@@ -54,6 +54,7 @@ const TIMELINE = {
   // Phase 5: Brownian motion and blob formation
   phase5Start: 72.0,    // 60.0 + 12.0
   textFadeOut: 3.0,     // fade out original text (slower)
+  dotTransform: 5.0,    // dots transform to blue/shrink (5s)
   blobForm: 20.0,       // dots slowly move to blob positions (much slower)
 
   // End
@@ -321,7 +322,8 @@ function findTangentPoints(edges, threshold, radius) {
         delay: Math.random(),  // Random delay 0-1 for asynchronous appearance
         growthDelay: Math.random(),  // Separate delay for growth phase
         scale: 1,  // Individual scale for asynchronous growth
-        fate: Math.random() < BLUE_DOT_PERCENTAGE ? 'blueSmall' : 'white'  // 30% turn blue and shrink
+        fate: 'white',  // Initially white, assigned later
+        transformProgress: 0  // 0 = white, 1 = fully transformed to blue
       });
     }
   }
@@ -356,7 +358,8 @@ function initPhase3() {
         delay: Math.random(),  // Random delay for more organic appearance
         growthDelay: Math.random(),  // Separate delay for growth phase
         scale: 1,  // Individual scale for asynchronous growth
-        fate: Math.random() < BLUE_DOT_PERCENTAGE ? 'blueSmall' : 'white'  // 30% turn blue and shrink
+        fate: 'white',  // Initially white, assigned later
+        transformProgress: 0  // 0 = white, 1 = fully transformed to blue
       });
     });
     
@@ -434,14 +437,17 @@ function initPhase5() {
     blob.y = constrain(blob.y, BASE_H * 0.05, BASE_H * 0.95);
   });
 
-  // Add physics properties to tangent dots
+  // Add physics properties to tangent dots and assign fates
   tangentDots.forEach(dot => {
     dot.vx = 0;
     dot.vy = 0;
     dot.targetBlob = floor(random(BLOB_COUNT));  // Assign to random blob
+    // Assign fate: 30% will transform to blue and shrink
+    dot.fate = Math.random() < BLUE_DOT_PERCENTAGE ? 'blueSmall' : 'white';
+    dot.transformDelay = Math.random();  // Random delay for transformation
   });
 
-  // Add physics properties to fill dots
+  // Add physics properties to fill dots and assign fates
   for (const elementName of Object.keys(fillDots)) {
     fillDots[elementName].forEach(dot => {
       dot.vx = 0;
@@ -449,6 +455,9 @@ function initPhase5() {
       if (elementName === 'numbers2026') {
         dot.targetBlob = floor(random(BLOB_COUNT));  // Assign to random blob
       }
+      // Assign fate: 30% will transform to blue and shrink
+      dot.fate = Math.random() < BLUE_DOT_PERCENTAGE ? 'blueSmall' : 'white';
+      dot.transformDelay = Math.random();  // Random delay for transformation
     });
   }
 
@@ -723,7 +732,8 @@ function updatePhase4(t) {
 function updatePhase5(t) {
   const p5 = TIMELINE.phase5Start;
   const fadeEnd = p5 + TIMELINE.textFadeOut;
-  const blobEnd = fadeEnd + TIMELINE.blobForm;
+  const transformEnd = fadeEnd + TIMELINE.dotTransform;
+  const blobEnd = transformEnd + TIMELINE.blobForm;
 
   // Before phase 5
   if (t < p5) {
@@ -739,10 +749,45 @@ function updatePhase5(t) {
     posterOpacity = 0;
   }
 
+  // Transform dots (shrink blue dots, after text fades)
+  if (t >= fadeEnd && t < transformEnd) {
+    const overallProgress = (t - fadeEnd) / TIMELINE.dotTransform;
+
+    // Update transformation for tangent dots
+    tangentDots.forEach(dot => {
+      if (dot.fate === 'blueSmall') {
+        // Asynchronous transformation with individual delays
+        const dotProgress = Math.max(0, (overallProgress - dot.transformDelay * 0.7) / 0.3);
+        dot.transformProgress = easeInOutCubic(Math.min(1, dotProgress));
+      }
+    });
+
+    // Update transformation for fill dots
+    for (const elementName of Object.keys(fillDots)) {
+      fillDots[elementName].forEach(dot => {
+        if (dot.fate === 'blueSmall') {
+          // Asynchronous transformation with individual delays
+          const dotProgress = Math.max(0, (overallProgress - dot.transformDelay * 0.7) / 0.3);
+          dot.transformProgress = easeInOutCubic(Math.min(1, dotProgress));
+        }
+      });
+    }
+  } else if (t >= transformEnd) {
+    // Ensure all transformations are complete
+    tangentDots.forEach(dot => {
+      if (dot.fate === 'blueSmall') dot.transformProgress = 1;
+    });
+    for (const elementName of Object.keys(fillDots)) {
+      fillDots[elementName].forEach(dot => {
+        if (dot.fate === 'blueSmall') dot.transformProgress = 1;
+      });
+    }
+  }
+
   // Apply Brownian motion and blob formation
   if (t >= p5) {
-    const motionProgress = t >= fadeEnd ?
-      Math.min(1, (t - fadeEnd) / TIMELINE.blobForm) : 0;
+    const motionProgress = t >= transformEnd ?
+      Math.min(1, (t - transformEnd) / TIMELINE.blobForm) : 0;
 
     // Update tangent dots (2026 dots - move to blobs)
     tangentDots.forEach(dot => {
@@ -1018,31 +1063,46 @@ function drawDots(dots, globalScale = 1, maxScale = 1, showStroke = true, is2026
     // Use individual dot scale if available, otherwise use global scale
     let scale = dot.scale !== undefined ? dot.scale : globalScale;
 
-    // Determine dot appearance based on fate
+    // Determine dot appearance based on fate and transformation progress
     const fate = dot.fate || 'white';
-    let fillColor, strokeColor, useStroke;
+    const transformProgress = dot.transformProgress !== undefined ? dot.transformProgress : 0;
 
-    if (fate === 'blueSmall') {
-      // Blue dots: full blue fill, no stroke, smaller final size
-      fillColor = DOT_STYLE.stroke;  // Use stroke color (blue) for fill
-      strokeColor = null;
-      useStroke = false;
+    let fillColor, strokeColor, useStroke, strokeAlpha;
 
-      // Apply shrink factor to scale
+    if (fate === 'blueSmall' && transformProgress > 0) {
+      // Interpolate between white (with stroke) and blue (no stroke)
+      const whiteColor = DOT_STYLE.fill;
+      const blueColor = DOT_STYLE.stroke;
+
+      // Lerp fill color from white to blue
+      fillColor = [
+        whiteColor[0] + (blueColor[0] - whiteColor[0]) * transformProgress,
+        whiteColor[1] + (blueColor[1] - whiteColor[1]) * transformProgress,
+        whiteColor[2] + (blueColor[2] - whiteColor[2]) * transformProgress
+      ];
+
+      // Fade out stroke as transformation progresses
+      strokeColor = DOT_STYLE.stroke;
+      useStroke = showStroke && transformProgress < 1;
+      strokeAlpha = 1 - transformProgress;  // Fade out stroke
+
+      // Apply shrink factor to scale based on transformation progress
       const shrinkFactor = is2026 ? BLUE_DOT_SHRINK_2026 : BLUE_DOT_SHRINK_OTHER;
-      scale = 1 + (scale - 1) * shrinkFactor;
+      const targetScale = 1 + (scale - 1) * shrinkFactor;
+      scale = scale + (targetScale - scale) * transformProgress;
     } else {
       // White dots: white fill, blue stroke (current behavior)
       fillColor = DOT_STYLE.fill;
       strokeColor = DOT_STYLE.stroke;
       useStroke = showStroke;
+      strokeAlpha = 1;
     }
 
     push();
     fill(fillColor[0], fillColor[1], fillColor[2], dot.opacity * 255);
 
     if (useStroke && strokeColor) {
-      stroke(strokeColor[0], strokeColor[1], strokeColor[2], dot.opacity * 255);
+      stroke(strokeColor[0], strokeColor[1], strokeColor[2], dot.opacity * 255 * strokeAlpha);
       // Scale stroke weight: goes from 1x to 2x as dots reach their max scale
       const progress = maxScale > 1 ? (scale - 1) / (maxScale - 1) : 0;
       const strokeScale = 1 + progress;  // 1x to 2x

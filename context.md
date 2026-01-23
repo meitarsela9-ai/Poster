@@ -57,29 +57,30 @@ Figma API credentials are stored in `.env` file:
 - Fills to 42% density (reduced by 30% from original 60%)
 - **Completely randomized timing**: Dots appear organically with no predictable pattern (25s)
 - Creates continuous surprise and discovery
-- **Dot Fate Assignment**: Each dot randomly assigned one of two fates:
-  - 70% become white dots (white fill, blue stroke)
-  - 30% become blue dots (blue fill, no stroke, smaller final size)
 
 ### Phase 4: Dot Growth (60.0s - 72.0s)
 - **Asynchronous growth**: Each individual dot grows at its own pace with random delays
-- **2026 dots** (tangent + fill):
-  - White dots grow 11x their original size
-  - Blue dots grow smaller (40% of white dot size)
-- **Other dots** (times, language, address, top, bottom):
-  - White dots grow 4x their original size
-  - Blue dots grow smaller (50% of white dot size)
-- Blue borders (stroke) grow from 1x to 2x thickness as white dots expand
+- **All dots grow uniformly at this stage**:
+  - 2026 dots (tangent + fill) grow 11x their original size
+  - Other dots (times, language, address, top, bottom) grow 4x their original size
+- Blue borders (stroke) grow from 1x to 2x thickness as dots expand
 - Wave-like effect as different dots reach full size at different times (12s)
-- Hold at final size for 10 seconds
 
-### Phase 5: Brownian Motion (72.0s+)
-- Original text/graphics fade out slowly (3s)
-- White dots lose their blue stroke as text fades
-- Blue dots remain blue and solid
-- 2026 dots move toward 5 blob centers with Brownian motion
-- Other dots drift freely with gentle Brownian motion
-- Very slow, organic movement (20s)
+### Phase 5: Transformation and Brownian Motion (72.0s+)
+- **Text Fade Out** (72.0s - 75.0s): Original text/graphics fade out slowly (3s)
+- **Dot Transformation** (75.0s - 80.0s): 30% of dots transform over 5 seconds
+  - **Fate Assignment**: At start of Phase 5, each dot randomly assigned one of two fates:
+    - 70% stay white (white fill, blue stroke)
+    - 30% transform to blue (gradually change from white to blue fill, stroke fades out)
+  - **Asynchronous transformation**: Each transforming dot has individual delay for organic wave-like effect
+  - **Shrinking**: As dots turn blue, they shrink:
+    - 2026 blue dots shrink to 40% of their grown size
+    - Other blue dots shrink to 50% of their grown size
+  - **Color transition**: Dots smoothly interpolate from white to blue fill, stroke fades out
+- **Brownian Motion** (80.0s - 100.0s): Dots float and move organically
+  - 2026 dots move toward 5 blob centers with Brownian motion
+  - Other dots drift freely with gentle Brownian motion
+  - Very slow, organic movement (20s)
 
 ## Key Configuration (top of sketch.js)
 
@@ -101,8 +102,9 @@ const TIMELINE = {
   phase4Start: 60.0,      // 35.0 + 25.0
   dotsGrow: 12.0,         // Slow asynchronous growth
   phase5Start: 72.0,      // 60.0 + 12.0
-  textFadeOut: 3.0,
-  blobForm: 20.0,
+  textFadeOut: 3.0,       // Text fades out
+  dotTransform: 5.0,      // Dots transform to blue/shrink
+  blobForm: 20.0,         // Blob formation
   holdFinal: 10.0
 };
 
@@ -138,10 +140,11 @@ const EDGE_THRESHOLDS = {
 4. **Tangent Detection**: Analyzes local edge direction, selects points where edge is mostly horizontal or vertical
 5. **Sampling**: Grid-based sampling ensures even dot distribution
 6. **Asynchronous Dot Appearance**: Each dot has individual random `delay` property (0-1). Dots appear organically over extended periods creating continuous surprise.
-7. **Dot Fate Assignment**: Each dot randomly assigned a `fate` property: 70% become 'white' (white fill, blue stroke), 30% become 'blueSmall' (blue fill, no stroke, smaller final size).
-8. **Asynchronous Dot Growth**: Each dot has individual `scale` and `growthDelay` properties. Dots grow at their own pace creating wave-like patterns. White 2026 dots grow 11x, blue 2026 dots grow to 40% of that. White other dots grow 4x, blue other dots grow to 50% of that. Stroke weight scales from 1x to 2x as white dots grow.
-9. **Phase 5 Blob Formation**: 2026 dots assigned to 5 blob centers, move with attraction force and Brownian motion. Other dots drift freely. White dots lose stroke, blue dots remain solid blue.
-10. **Animation Timing**: Slow, entrancing pace designed to mesmerize viewers. Total runtime: ~105 seconds (~1 minute 45 seconds)
+7. **Asynchronous Dot Growth**: Each dot has individual `scale` and `growthDelay` properties. Dots grow at their own pace creating wave-like patterns. All 2026 dots grow 11x, all other dots grow 4x. Stroke weight scales from 1x to 2x as dots grow.
+8. **Dot Fate Assignment**: At start of Phase 5, each dot randomly assigned a `fate` property: 70% stay 'white', 30% become 'blueSmall'. Each transforming dot gets random `transformDelay` for asynchronous transformation.
+9. **Dot Transformation**: During Phase 5 (after text fade), 30% of dots gradually transform over 5s: fill color interpolates from white to blue, stroke fades out, size shrinks (2026 dots to 40%, other dots to 50% of grown size). Each dot transforms at its own pace based on `transformDelay`.
+10. **Phase 5 Blob Formation**: After transformation, 2026 dots move toward 5 blob centers with attraction force and Brownian motion. Other dots drift freely. Final state: 70% white dots (no stroke after posterOpacity=0), 30% smaller blue dots (solid blue, no stroke).
+11. **Animation Timing**: Slow, entrancing pace designed to mesmerize viewers. Total runtime: ~110 seconds (~1 minute 50 seconds)
 
 ## How to Run
 ```bash
