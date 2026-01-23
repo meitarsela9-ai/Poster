@@ -84,6 +84,11 @@ const FILL_DOT_RADIUS = 3;
 const DOT_GROW_2026 = 11;  // 2026 dots grow 11x (increased for more dramatic effect)
 const DOT_GROW_OTHER = 4;  // Other dots grow 4x
 
+// Dot transformation - percentage of dots that turn blue and shrink
+const BLUE_DOT_PERCENTAGE = 0.3;  // 30% of dots
+const BLUE_DOT_SHRINK_2026 = 0.4;  // Blue 2026 dots shrink to 40% of white dots
+const BLUE_DOT_SHRINK_OTHER = 0.5;  // Blue other dots shrink to 50% of white dots
+
 // Phase 5: Brownian motion
 const BLOB_COUNT = 5;  // Number of blobs for 2026 dots
 const BLOB_ATTRACTION = 0.04;  // How strongly dots are pulled to blobs (slower)
@@ -315,7 +320,8 @@ function findTangentPoints(edges, threshold, radius) {
         opacity: 0,
         delay: Math.random(),  // Random delay 0-1 for asynchronous appearance
         growthDelay: Math.random(),  // Separate delay for growth phase
-        scale: 1  // Individual scale for asynchronous growth
+        scale: 1,  // Individual scale for asynchronous growth
+        fate: Math.random() < BLUE_DOT_PERCENTAGE ? 'blueSmall' : 'white'  // 30% turn blue and shrink
       });
     }
   }
@@ -349,7 +355,8 @@ function initPhase3() {
         opacity: 0,
         delay: Math.random(),  // Random delay for more organic appearance
         growthDelay: Math.random(),  // Separate delay for growth phase
-        scale: 1  // Individual scale for asynchronous growth
+        scale: 1,  // Individual scale for asynchronous growth
+        fate: Math.random() < BLUE_DOT_PERCENTAGE ? 'blueSmall' : 'white'  // 30% turn blue and shrink
       });
     });
     
@@ -921,16 +928,16 @@ function renderScene(t) {
   }
   
   // Draw Phase 2 tangent dots (on 2026, so use 2026 scale, with stroke)
-  drawDots(tangentDots, dotScale2026, DOT_GROW_2026, true);
+  drawDots(tangentDots, dotScale2026, DOT_GROW_2026, true, true);
 
   // Draw Phase 3 fill dots (numbers2026 use 2026 scale, others use other scale)
   for (const elementName of Object.keys(fillDots)) {
     if (elementName === 'numbers2026') {
-      drawDots(fillDots[elementName], dotScale2026, DOT_GROW_2026, true);
+      drawDots(fillDots[elementName], dotScale2026, DOT_GROW_2026, true, true);
     } else {
       // Other dots lose stroke in Phase 5 (posterOpacity == 0)
       const showStroke = posterOpacity > 0;
-      drawDots(fillDots[elementName], dotScaleOther, DOT_GROW_OTHER, showStroke);
+      drawDots(fillDots[elementName], dotScaleOther, DOT_GROW_OTHER, showStroke, false);
     }
   }
 }
@@ -1004,18 +1011,38 @@ function drawCornerElements(dotsOpacity, handlesOpacity, x, y, w, h) {
   }
 }
 
-function drawDots(dots, globalScale = 1, maxScale = 1, showStroke = true) {
+function drawDots(dots, globalScale = 1, maxScale = 1, showStroke = true, is2026 = false) {
   for (const dot of dots) {
     if (dot.opacity <= 0) continue;
 
     // Use individual dot scale if available, otherwise use global scale
-    const scale = dot.scale !== undefined ? dot.scale : globalScale;
+    let scale = dot.scale !== undefined ? dot.scale : globalScale;
+
+    // Determine dot appearance based on fate
+    const fate = dot.fate || 'white';
+    let fillColor, strokeColor, useStroke;
+
+    if (fate === 'blueSmall') {
+      // Blue dots: full blue fill, no stroke, smaller final size
+      fillColor = DOT_STYLE.stroke;  // Use stroke color (blue) for fill
+      strokeColor = null;
+      useStroke = false;
+
+      // Apply shrink factor to scale
+      const shrinkFactor = is2026 ? BLUE_DOT_SHRINK_2026 : BLUE_DOT_SHRINK_OTHER;
+      scale = 1 + (scale - 1) * shrinkFactor;
+    } else {
+      // White dots: white fill, blue stroke (current behavior)
+      fillColor = DOT_STYLE.fill;
+      strokeColor = DOT_STYLE.stroke;
+      useStroke = showStroke;
+    }
 
     push();
-    fill(DOT_STYLE.fill[0], DOT_STYLE.fill[1], DOT_STYLE.fill[2], dot.opacity * 255);
+    fill(fillColor[0], fillColor[1], fillColor[2], dot.opacity * 255);
 
-    if (showStroke) {
-      stroke(DOT_STYLE.stroke[0], DOT_STYLE.stroke[1], DOT_STYLE.stroke[2], dot.opacity * 255);
+    if (useStroke && strokeColor) {
+      stroke(strokeColor[0], strokeColor[1], strokeColor[2], dot.opacity * 255);
       // Scale stroke weight: goes from 1x to 2x as dots reach their max scale
       const progress = maxScale > 1 ? (scale - 1) / (maxScale - 1) : 0;
       const strokeScale = 1 + progress;  // 1x to 2x

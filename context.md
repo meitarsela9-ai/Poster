@@ -54,20 +54,29 @@ Figma API credentials are stored in `.env` file:
 
 ### Phase 3: Gradual Fill (35.0s - 60.0s)
 - Dots gradually appear on all elements (2026, Times, Language, address, top, bottom)
-- Fills to 60% density
+- Fills to 42% density (reduced by 30% from original 60%)
 - **Completely randomized timing**: Dots appear organically with no predictable pattern (25s)
 - Creates continuous surprise and discovery
+- **Dot Fate Assignment**: Each dot randomly assigned one of two fates:
+  - 70% become white dots (white fill, blue stroke)
+  - 30% become blue dots (blue fill, no stroke, smaller final size)
 
 ### Phase 4: Dot Growth (60.0s - 72.0s)
 - **Asynchronous growth**: Each individual dot grows at its own pace with random delays
-- 2026 dots (tangent + fill) grow 8x their original size
-- Other dots (times, language, address, top, bottom) grow 4x their original size
-- Blue borders (stroke) grow from 1x to 2x thickness as dots expand
+- **2026 dots** (tangent + fill):
+  - White dots grow 11x their original size
+  - Blue dots grow smaller (40% of white dot size)
+- **Other dots** (times, language, address, top, bottom):
+  - White dots grow 4x their original size
+  - Blue dots grow smaller (50% of white dot size)
+- Blue borders (stroke) grow from 1x to 2x thickness as white dots expand
 - Wave-like effect as different dots reach full size at different times (12s)
 - Hold at final size for 10 seconds
 
 ### Phase 5: Brownian Motion (72.0s+)
 - Original text/graphics fade out slowly (3s)
+- White dots lose their blue stroke as text fades
+- Blue dots remain blue and solid
 - 2026 dots move toward 5 blob centers with Brownian motion
 - Other dots drift freely with gentle Brownian motion
 - Very slow, organic movement (20s)
@@ -97,15 +106,18 @@ const TIMELINE = {
   holdFinal: 10.0
 };
 
-const RECT_PADDING = 30;          // Padding around Times/Language (prevents dot overlap)
-const RECT_GROW_SCALE = 1.2;      // Rectangle uniform expansion multiplier
-const TEXT_GROW_SCALE = 1.15;     // Text expansion (smaller than rectangle)
-const RECT_POSTER_MARGIN = 20;    // Margin from poster edges in final position
-const FILL_TARGET = 0.6;          // 60% edge fill
-const TANGENT_THRESHOLD = 0.15;   // Lower = more tangent points
-const DOT_GROW_2026 = 8;          // 2026 dots grow 8x
-const DOT_GROW_OTHER = 4;         // Other dots grow 4x
-const rectFadeOutEnabled = true;  // Rectangle lines fade out, dots stay visible
+const RECT_PADDING = 30;              // Padding around Times/Language (prevents dot overlap)
+const RECT_GROW_SCALE = 1.2;          // Rectangle uniform expansion multiplier
+const TEXT_GROW_SCALE = 1.15;         // Text expansion (smaller than rectangle)
+const RECT_POSTER_MARGIN = 20;        // Margin from poster edges in final position
+const FILL_TARGET = 0.42;             // 42% edge fill (reduced by 30%)
+const TANGENT_THRESHOLD = 0.15;       // Lower = more tangent points
+const DOT_GROW_2026 = 11;             // 2026 white dots grow 11x
+const DOT_GROW_OTHER = 4;             // Other white dots grow 4x
+const BLUE_DOT_PERCENTAGE = 0.3;      // 30% of dots turn blue and shrink
+const BLUE_DOT_SHRINK_2026 = 0.4;     // Blue 2026 dots are 40% size of white dots
+const BLUE_DOT_SHRINK_OTHER = 0.5;    // Blue other dots are 50% size of white dots
+const rectFadeOutEnabled = true;      // Rectangle lines fade out, dots stay visible
 ```
 
 ## Edge Detection Thresholds
@@ -126,9 +138,10 @@ const EDGE_THRESHOLDS = {
 4. **Tangent Detection**: Analyzes local edge direction, selects points where edge is mostly horizontal or vertical
 5. **Sampling**: Grid-based sampling ensures even dot distribution
 6. **Asynchronous Dot Appearance**: Each dot has individual random `delay` property (0-1). Dots appear organically over extended periods creating continuous surprise.
-7. **Asynchronous Dot Growth**: Each dot has individual `scale` and `growthDelay` properties. Dots grow at their own pace creating wave-like patterns. 2026 dots (8x), other dots (4x). Stroke weight scales from 1x to 2x as dots grow.
-8. **Phase 5 Blob Formation**: 2026 dots assigned to 5 blob centers, move with attraction force and Brownian motion. Other dots drift freely.
-9. **Animation Timing**: Slow, entrancing pace designed to mesmerize viewers. Total runtime: ~105 seconds (~1 minute 45 seconds)
+7. **Dot Fate Assignment**: Each dot randomly assigned a `fate` property: 70% become 'white' (white fill, blue stroke), 30% become 'blueSmall' (blue fill, no stroke, smaller final size).
+8. **Asynchronous Dot Growth**: Each dot has individual `scale` and `growthDelay` properties. Dots grow at their own pace creating wave-like patterns. White 2026 dots grow 11x, blue 2026 dots grow to 40% of that. White other dots grow 4x, blue other dots grow to 50% of that. Stroke weight scales from 1x to 2x as white dots grow.
+9. **Phase 5 Blob Formation**: 2026 dots assigned to 5 blob centers, move with attraction force and Brownian motion. Other dots drift freely. White dots lose stroke, blue dots remain solid blue.
+10. **Animation Timing**: Slow, entrancing pace designed to mesmerize viewers. Total runtime: ~105 seconds (~1 minute 45 seconds)
 
 ## How to Run
 ```bash
