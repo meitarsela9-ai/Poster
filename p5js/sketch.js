@@ -9,6 +9,8 @@ const BG_HEX = "#D9DDE6";
 
 // ===== Assets =====
 let numbersImg, topSVG, addrSVG, botLSVG, timesImg, langImg, rectangleLinesSVG;
+let textData;  // Figma text data
+let ibmPlexFont;  // IBM Plex Mono font
 
 // ===== Element positions (BASE coords) =====
 const items = {
@@ -98,6 +100,12 @@ const BROWNIAN_FORCE = 0.2;  // Random force strength for 2026 dots
 const DAMPING = 0.93;  // Velocity damping (friction)
 const OTHER_DOT_DRIFT = 0.25;  // Gentle Brownian motion for other dots
 
+// Phase 5: Floating words
+const WORD_DRIFT = 0.3;  // Brownian force for floating words
+const WORD_DAMPING = 0.95;  // Damping for word movement
+const WORD_BREAK_DELAY = 1.0;  // Delay before words start breaking apart (seconds)
+const WORD_BREAK_DURATION = 2.0;  // Duration of the break-apart transition (seconds)
+
 // Edge detection thresholds
 const EDGE_THRESHOLDS = {
   numbers2026: { solid: 200, empty: 180 },
@@ -148,6 +156,9 @@ let dotScaleOther = 1;  // Scale for other dots
 let posterOpacity = 1;  // Opacity of original poster elements
 let blobCenters = [];  // Positions of the 5 blobs for 2026 dots
 
+// Phase 5: Floating words
+let floatingWords = [];  // Array of word particles that float with Brownian motion
+
 // All edge points (100%) for sampling
 let allEdges = {
   numbers2026: [],
@@ -168,6 +179,7 @@ function preload() {
   timesImg   = loadImage("Times.png");
   langImg    = loadImage("Language.png");
   rectangleLinesSVG = loadImage("rectangle-lines.svg");
+  textData = loadJSON("text-data.json");  // Load exact text positions from Figma
 }
 
 function setup() {
@@ -462,7 +474,66 @@ function initPhase5() {
     });
   }
 
+  // Initialize floating words from text blocks
+  initFloatingWords();
+
   console.log(`  Created ${BLOB_COUNT} blob centers for 2026 dots`);
+  console.log(`  Created ${floatingWords.length} floating words`);
+}
+
+function initFloatingWords() {
+  if (!textData || !textData.texts) {
+    console.error('Text data not loaded');
+    return;
+  }
+
+  console.log(`Loading ${textData.texts.length} text elements from Figma...`);
+
+  // Process each text node from Figma
+  textData.texts.forEach((textNode, index) => {
+    // Split text into words (handle multi-line text by removing newlines first)
+    const cleanText = textNode.text.replace(/\n/g, ' ').trim();
+    if (cleanText.length === 0) return;
+
+    const words = cleanText.split(/\s+/);
+    const fontSize = textNode.fontSize;
+    const fontWeight = textNode.fontWeight;
+
+    // Calculate approximate character width for IBM Plex Mono (monospace font)
+    // Monospace fonts have consistent character widths
+    const charWidth = fontSize * 0.6;  // IBM Plex Mono is about 0.6em wide per character
+
+    let currentX = textNode.x;
+    const currentY = textNode.y;
+
+    words.forEach((word, wordIndex) => {
+      if (word.trim().length > 0) {
+        // Calculate word width (monospace = char width * length)
+        const wordWidth = word.length * charWidth;
+
+        floatingWords.push({
+          text: word,
+          originalX: currentX,
+          originalY: currentY,
+          x: currentX,
+          y: currentY,
+          vx: 0,
+          vy: 0,
+          opacity: 0,
+          fadeDelay: random(0, 1),
+          breakDelay: random(0, 1),
+          size: fontSize,
+          fontWeight: fontWeight,
+          textNode: textNode.name
+        });
+
+        // Move to next word position (add word width + space)
+        currentX += wordWidth + charWidth;
+      }
+    });
+  });
+
+  console.log(`Created ${floatingWords.length} floating word particles`);
 }
 
 // ===== MAIN DRAW LOOP =====
@@ -805,7 +876,56 @@ function updatePhase5(t) {
         }
       });
     }
+
+    // Update floating words
+    updateFloatingWords(t, fadeEnd);
   }
+}
+
+function updateFloatingWords(t, fadeEnd) {
+  const timeSinceFade = t - fadeEnd;
+
+  // Phase 1: Words fade in at original positions (0-1s)
+  // Phase 2: Words start breaking apart (1-3s)
+  // Phase 3: Words float freely (3s+)
+
+  floatingWords.forEach(word => {
+    // Fade in with individual delays (synchronized with posterOpacity fade)
+    const fadeInProgress = Math.min(1, timeSinceFade / WORD_BREAK_DELAY);
+    const wordFadeProgress = Math.max(0, (fadeInProgress - word.fadeDelay * 0.7) / 0.3);
+    word.opacity = easeOutCubic(Math.min(1, wordFadeProgress));
+
+    // Breaking apart phase
+    if (timeSinceFade > WORD_BREAK_DELAY) {
+      const breakTimeSince = timeSinceFade - WORD_BREAK_DELAY;
+      const breakProgress = Math.min(1, breakTimeSince / WORD_BREAK_DURATION);
+      const wordBreakProgress = Math.max(0, (breakProgress - word.breakDelay * 0.7) / 0.3);
+
+      if (wordBreakProgress > 0) {
+        // Apply Brownian motion
+        word.vx += (random() - 0.5) * WORD_DRIFT;
+        word.vy += (random() - 0.5) * WORD_DRIFT;
+
+        // Apply damping
+        word.vx *= WORD_DAMPING;
+        word.vy *= WORD_DAMPING;
+
+        // Update position
+        word.x += word.vx;
+        word.y += word.vy;
+
+        // Bounce off edges
+        if (word.x < 0 || word.x > BASE_W) {
+          word.vx *= -0.8;
+          word.x = constrain(word.x, 0, BASE_W);
+        }
+        if (word.y < 0 || word.y > BASE_H) {
+          word.vy *= -0.8;
+          word.y = constrain(word.y, 0, BASE_H);
+        }
+      }
+    }
+  });
 }
 
 function updateDotPhysics2026(dot, blobProgress) {
@@ -986,6 +1106,9 @@ function renderScene(t) {
       drawDots(fillDots[elementName], dotScaleOther, DOT_GROW_OTHER, showStroke, false);
     }
   }
+
+  // Draw floating words (Phase 5)
+  drawFloatingWords();
 }
 
 function drawCornerElements(dotsOpacity, handlesOpacity, x, y, w, h) {
@@ -1253,4 +1376,37 @@ function easeOutCubic(t) {
 
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+// ===== FLOATING WORDS RENDERING =====
+
+function drawFloatingWords() {
+  if (floatingWords.length === 0) return;
+
+  push();
+  textFont('IBM Plex Mono, monospace');  // Use IBM Plex Mono (exact font from Figma)
+  textAlign(LEFT, TOP);  // Align left/top to match original SVG positioning
+  noStroke();
+
+  for (const word of floatingWords) {
+    if (word.opacity > 0) {
+      push();
+      fill(0, 10, 27, word.opacity * 255);  // Match the SVG text color #000A1B
+      textSize(word.size);
+
+      // Apply font weight (p5.js doesn't have direct fontWeight, but we can use textStyle)
+      if (word.fontWeight >= 700) {
+        textStyle(BOLD);
+      } else if (word.fontWeight >= 500) {
+        textStyle(NORMAL);  // Medium weight = normal in p5.js
+      } else {
+        textStyle(NORMAL);
+      }
+
+      text(word.text, word.x, word.y);
+      pop();
+    }
+  }
+
+  pop();
 }
