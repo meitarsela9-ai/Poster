@@ -30,45 +30,43 @@ const GLOW_BLUR_PX = 35;
 
 // ===== TIMELINE (seconds) =====
 const TIMELINE = {
-  // Phase 1: Rectangle animation
+  // Phase 1: The Breath - A breathing graphic design poster
   phase1Start: 2.5,
-  rectForm: 2.0,        // rectangle fades in (slower)
-  rectGrow: 3.5,        // rectangle expands (slower)
-  textGrow: 3.0,        // text scales up (slower)
-  holdExpanded: 2.0,    // pause at max (longer)
-  textShrink: 3.0,      // text scales back (slower)
-  rectShrink: 3.5,      // rectangle shrinks back (slower)
-  rectGrowToPoster: 5.0, // rectangle grows to fill poster (much slower)
-  rectFade: 2.5,        // rectangle fades out (slower)
+  rectForm: 2.0,        // The setup: rectangle fades in
+  breathInhale: 4.0,    // The breath (inhale): unified expansion of rectangle + text
+  breathHold: 2.5,      // The breath (hold): pause at peak inflation
+  breathExhale: 4.0,    // The breath (exhale): unified contraction back to origin
+  releaseGrow: 6.0,     // The release: slow growth to poster edges, locking into place
+  ghostFade: 3.0,       // The ghosting: rectangle fades, corner dots remain as anchors
 
-  // Phase 2: Tangent dots on 2026
-  phase2Start: 27.0,    // after phase 1 completes
-  tangentAppear: 8.0,   // tangent dots appear asynchronously (very slow)
+  // Phase 2: The Constellation - Stars flickering on a horizon
+  phase2Start: 27.0,    // The shift: 2026 begins to be analyzed
+  tangentAppear: 8.0,   // Dots twinkle into existence along tangents (ripple of light)
 
-  // Phase 3: Gradual fill
-  phase3Start: 35.0,    // 27.0 + 8.0
-  gradualFill: 25.0,    // time to reach 60% fill (very slow, entrancing)
+  // Phase 3: The Infusion - A slow, creeping density
+  phase3Start: 35.0,    // The accumulation begins
+  gradualFill: 25.0,    // Slow sprinkle, like rain on pavement
 
-  // Phase 4: Dots grow
-  phase4Start: 60.0,    // 35.0 + 25.0
-  dotsGrow: 12.0,       // dots grow to final size (asynchronous, much slower)
+  // Phase 4: The Bloom - Ink expanding in water / Popcorn popping
+  phase4Start: 60.0,    // The expansion: data points inflate
+  dotsGrow: 12.0,       // Aggressive balloon expansion, bubbles form
 
-  // Phase 5: Brownian motion and blob formation
-  phase5Start: 72.0,    // 60.0 + 12.0
-  textFadeOut: 3.0,     // fade out original text (slower)
-  floatBeforeTransform: 15.0,  // dots float for a while before transforming
-  dotTransform: 5.0,    // dots transform to blue/shrink (5s)
-  blobForm: 20.0,       // dots slowly move to blob positions (much slower)
+  // Phase 5: The Rupture & Resurfacing - Layered ecosystem
+  phase5Start: 72.0,    // Frame 11: Peak Saturation (end of bloom)
+  ruptureStart: 75.0,   // Frame 12: The Rupture - separation of scales begins
+  ruptureTransform: 4.0, // Blue dots emerge as residue/pixel debris
+  resurfacing: 8.0,     // Frame 13: The Resurfacing - text becomes primary
+  dissipation: 15.0,    // White bubbles drift off-screen, blue dots bridge
 
   // End
-  holdFinal: 10.0       // longer hold at end
+  holdFinal: 10.0       // Ecosystem stabilizes
 };
 
 // ===== DOT SETTINGS =====
 const DOT_STYLE = {
   fill: [255, 255, 255],
   stroke: [0, 149, 255],
-  strokeWeight: 0.8
+  strokeWeight: 1.2  // Thicker blue outlines for bubble texture
 };
 
 const RECT_DOT_SPACING = 12;  // spacing for rectangle border dots
@@ -84,27 +82,28 @@ const TANGENT_DOT_RADIUS = 4;
 const FILL_TARGET = 0.3;  // 30% fill (reduced further to decrease busyness)
 const FILL_DOT_RADIUS = 3;
 
-// Phase 4: Dot growth
-const DOT_GROW_2026 = 11;  // 2026 dots grow 11x (increased for more dramatic effect)
-const DOT_GROW_OTHER = 4;  // Other dots grow 4x
+// Phase 4: The Bloom - Aggressive expansion contrast
+const DOT_GROW_2026 = 13;  // 2026 dots balloon aggressively (huge overlapping circles)
+const DOT_GROW_OTHER = 5;  // Other dots grow but stay smaller
+const STROKE_GROW_MAX = 3.5;  // Thick blue outlines at peak (bubble texture)
 
-// Dot transformation - percentage of dots that turn blue and shrink
-const BLUE_DOT_PERCENTAGE = 0.3;  // 30% of dots
-const BLUE_DOT_SHRINK_2026 = 0.4;  // Blue 2026 dots shrink to 40% of white dots
-const BLUE_DOT_SHRINK_OTHER = 0.5;  // Blue other dots shrink to 50% of white dots
+// The Rupture: Separation of scales
+const BLUE_DOT_PERCENTAGE = 0.3;  // 30% become residue (digital dust)
+const BLUE_DOT_SHRINK_2026 = 0.25;  // Blue dots shrink dramatically (pixel debris)
+const BLUE_DOT_SHRINK_OTHER = 0.3;  // Small solid blue dots (residue)
+const WHITE_FADE_RATE = 0.015;  // White bubbles slowly fade/dissipate
 
-// Phase 5: Brownian motion
-const BLOB_COUNT = 5;  // Number of blobs for 2026 dots
-const BLOB_ATTRACTION = 0.04;  // How strongly dots are pulled to blobs (slower)
-const BROWNIAN_FORCE = 0.2;  // Random force strength for 2026 dots
-const DAMPING = 0.93;  // Velocity damping (friction)
-const OTHER_DOT_DRIFT = 0.25;  // Gentle Brownian motion for other dots
+// Phase 5: The Rupture & Resurfacing
+const FOAM_CLUMP_FORCE = 0.08;  // White bubbles clump into islands
+const FOAM_DRIFT_FORCE = 0.15;  // White bubbles drift off-screen
+const RESIDUE_TRAIL_FORCE = 0.25;  // Blue dots follow bubble trails (digital dust)
+const RESIDUE_DAMPING = 0.92;  // Blue dots have more friction (residue feel)
+const FOAM_DAMPING = 0.96;  // White bubbles drift more freely
 
-// Phase 5: Floating words
-const WORD_DRIFT = 0.3;  // Brownian force for floating words
-const WORD_DAMPING = 0.95;  // Damping for word movement
-const WORD_BREAK_DELAY = 1.0;  // Delay before words start breaking apart (seconds)
-const WORD_BREAK_DURATION = 2.0;  // Duration of the break-apart transition (seconds)
+// Phase 5: Background Data Layer (floating words)
+const WORD_EMERGE_DELAY = 3.0;  // Words emerge after rupture begins
+const WORD_EMERGE_DURATION = 4.0;  // Slow emergence from grey space
+const WORD_DRIFT = 0.08;  // Minimal drift (words are static background data)
 
 // Edge detection thresholds
 const EDGE_THRESHOLDS = {
@@ -430,55 +429,72 @@ function sampleEdges(edges, spacing) {
 // ===== PHASE 5: BROWNIAN MOTION INITIALIZATION =====
 
 function initPhase5() {
-  console.log("Initializing Phase 5: Brownian motion and blob formation");
+  console.log("Initializing Phase 5: The Rupture & Resurfacing");
 
-  // Create 5 blob centers spread across the entire canvas in a pattern
-  // This ensures they're well-distributed and far apart
+  // Create island clump centers (white bubbles will clump here)
   blobCenters = [
-    { x: BASE_W * 0.15, y: BASE_H * 0.15 },  // Top left
-    { x: BASE_W * 0.85, y: BASE_H * 0.2 },   // Top right
-    { x: BASE_W * 0.5, y: BASE_H * 0.5 },    // Center
-    { x: BASE_W * 0.2, y: BASE_H * 0.8 },    // Bottom left
-    { x: BASE_W * 0.8, y: BASE_H * 0.85 }    // Bottom right
+    { x: BASE_W * 0.25, y: BASE_H * 0.3 },   // Island 1
+    { x: BASE_W * 0.7, y: BASE_H * 0.25 },   // Island 2
+    { x: BASE_W * 0.4, y: BASE_H * 0.65 },   // Island 3
+    { x: BASE_W * 0.8, y: BASE_H * 0.75 }    // Island 4
   ];
 
-  // Add some randomness to avoid perfect grid
+  // Add randomness to island positions
   blobCenters.forEach(blob => {
     blob.x += random(-BASE_W * 0.1, BASE_W * 0.1);
     blob.y += random(-BASE_H * 0.1, BASE_H * 0.1);
-    blob.x = constrain(blob.x, BASE_W * 0.05, BASE_W * 0.95);
-    blob.y = constrain(blob.y, BASE_H * 0.05, BASE_H * 0.95);
   });
 
-  // Add physics properties to tangent dots and assign fates
+  // Assign dots their layer roles
   tangentDots.forEach(dot => {
     dot.vx = 0;
     dot.vy = 0;
-    dot.targetBlob = floor(random(BLOB_COUNT));  // Assign to random blob
-    // Assign fate: 30% will transform to blue and shrink
-    dot.fate = Math.random() < BLUE_DOT_PERCENTAGE ? 'blueSmall' : 'white';
-    dot.transformDelay = Math.random();  // Random delay for transformation
+
+    // The Rupture: 30% become blue residue, 70% stay white foam
+    dot.fate = Math.random() < BLUE_DOT_PERCENTAGE ? 'residue' : 'foam';
+    dot.transformDelay = Math.random();
+
+    if (dot.fate === 'foam') {
+      // Foreground: White bubbles clump into islands
+      dot.targetIsland = floor(random(blobCenters.length));
+      dot.driftDirection = {
+        x: random(-1, 1),
+        y: random(-1, 1)
+      };
+    } else {
+      // Mid-ground: Blue dots follow trails (will track nearby foam)
+      dot.trailTarget = null;  // Will be set dynamically
+    }
   });
 
-  // Add physics properties to fill dots and assign fates
+  // Same for fill dots
   for (const elementName of Object.keys(fillDots)) {
     fillDots[elementName].forEach(dot => {
       dot.vx = 0;
       dot.vy = 0;
-      if (elementName === 'numbers2026') {
-        dot.targetBlob = floor(random(BLOB_COUNT));  // Assign to random blob
+
+      dot.fate = Math.random() < BLUE_DOT_PERCENTAGE ? 'residue' : 'foam';
+      dot.transformDelay = Math.random();
+
+      if (dot.fate === 'foam') {
+        dot.targetIsland = floor(random(blobCenters.length));
+        dot.driftDirection = {
+          x: random(-1, 1),
+          y: random(-1, 1)
+        };
+      } else {
+        dot.trailTarget = null;
       }
-      // Assign fate: 30% will transform to blue and shrink
-      dot.fate = Math.random() < BLUE_DOT_PERCENTAGE ? 'blueSmall' : 'white';
-      dot.transformDelay = Math.random();  // Random delay for transformation
     });
   }
 
-  // Initialize floating words from text blocks
+  // Background: Floating words (data layer)
   initFloatingWords();
 
-  console.log(`  Created ${BLOB_COUNT} blob centers for 2026 dots`);
-  console.log(`  Created ${floatingWords.length} floating words`);
+  console.log(`  Created 3-layer ecosystem:`);
+  console.log(`    - Foreground (Foam): White bubble islands`);
+  console.log(`    - Mid-ground (Residue): Blue particle trails`);
+  console.log(`    - Background (Data): ${floatingWords.length} text words`);
 }
 
 function initFloatingWords() {
@@ -559,13 +575,11 @@ function draw() {
 function updatePhase1(t) {
   const p1 = TIMELINE.phase1Start;
   const formEnd = p1 + TIMELINE.rectForm;
-  const growEnd = formEnd + TIMELINE.rectGrow;
-  const textGrowEnd = growEnd + TIMELINE.textGrow;
-  const holdEnd = textGrowEnd + TIMELINE.holdExpanded;
-  const textShrinkEnd = holdEnd + TIMELINE.textShrink;
-  const rectShrinkEnd = textShrinkEnd + TIMELINE.rectShrink;
-  const growToPosterEnd = rectShrinkEnd + TIMELINE.rectGrowToPoster;
-  const fadeEnd = growToPosterEnd + TIMELINE.rectFade;
+  const inhaleEnd = formEnd + TIMELINE.breathInhale;
+  const holdEnd = inhaleEnd + TIMELINE.breathHold;
+  const exhaleEnd = holdEnd + TIMELINE.breathExhale;
+  const releaseEnd = exhaleEnd + TIMELINE.releaseGrow;
+  const fadeEnd = releaseEnd + TIMELINE.ghostFade;
 
   // Target bounds: poster edges with margin
   const targetBounds = {
@@ -575,7 +589,7 @@ function updatePhase1(t) {
     h: BASE_H - RECT_POSTER_MARGIN * 2
   };
 
-  // Before phase 1
+  // Before phase 1: The Setup
   if (t < p1) {
     rectOpacity = 0;
     cornerDotsOpacity = 0;
@@ -587,7 +601,7 @@ function updatePhase1(t) {
     return;
   }
 
-  // Rectangle forming (fade in)
+  // The Setup: Rectangle fades in
   if (t < formEnd) {
     const progress = (t - p1) / TIMELINE.rectForm;
     rectOpacity = easeOutCubic(progress);
@@ -600,34 +614,26 @@ function updatePhase1(t) {
     return;
   }
 
-  // Rectangle growing (uniform scaling from center)
-  if (t < growEnd) {
-    const progress = easeInOutCubic((t - formEnd) / TIMELINE.rectGrow);
-    const scale = 1 + (RECT_GROW_SCALE - 1) * progress;
-    rectOpacity = 1;
-    cornerDotsOpacity = 1;
-    cornerHandlesOpacity = 1;
-    rectScaleX = scale;
-    rectScaleY = scale;
-    rectCurrentBounds = { ...rectInitialBounds };
-    textScale = 1;
-    return;
-  }
+  // The Breath - INHALE: Rectangle and text expand together (unified breathing)
+  if (t < inhaleEnd) {
+    const progress = easeBreathIn((t - formEnd) / TIMELINE.breathInhale);
 
-  // Text growing
-  if (t < textGrowEnd) {
-    const progress = easeInOutCubic((t - growEnd) / TIMELINE.textGrow);
-    rectOpacity = 1;
-    cornerDotsOpacity = 1;
-    cornerHandlesOpacity = 1;
-    rectScaleX = RECT_GROW_SCALE;
-    rectScaleY = RECT_GROW_SCALE;
-    rectCurrentBounds = { ...rectInitialBounds };
+    // Rectangle expands
+    const rectScale = 1 + (RECT_GROW_SCALE - 1) * progress;
+    rectScaleX = rectScale;
+    rectScaleY = rectScale;
+
+    // Text expands in sync with rectangle (unified breath)
     textScale = 1 + (TEXT_GROW_SCALE - 1) * progress;
+
+    rectOpacity = 1;
+    cornerDotsOpacity = 1;
+    cornerHandlesOpacity = 1;
+    rectCurrentBounds = { ...rectInitialBounds };
     return;
   }
 
-  // Hold expanded
+  // The Breath - HOLD: Pause at peak inflation
   if (t < holdEnd) {
     rectOpacity = 1;
     cornerDotsOpacity = 1;
@@ -639,43 +645,36 @@ function updatePhase1(t) {
     return;
   }
 
-  // Text shrinking
-  if (t < textShrinkEnd) {
-    const progress = easeInOutCubic((t - holdEnd) / TIMELINE.textShrink);
-    rectOpacity = 1;
-    cornerDotsOpacity = 1;
-    cornerHandlesOpacity = 1;
-    rectScaleX = RECT_GROW_SCALE;
-    rectScaleY = RECT_GROW_SCALE;
-    rectCurrentBounds = { ...rectInitialBounds };
+  // The Breath - EXHALE: Rectangle and text contract together (unified breathing)
+  if (t < exhaleEnd) {
+    const progress = easeBreathOut((t - holdEnd) / TIMELINE.breathExhale);
+
+    // Rectangle contracts
+    const rectScale = RECT_GROW_SCALE - (RECT_GROW_SCALE - 1) * progress;
+    rectScaleX = rectScale;
+    rectScaleY = rectScale;
+
+    // Text contracts in sync with rectangle (unified breath)
     textScale = TEXT_GROW_SCALE - (TEXT_GROW_SCALE - 1) * progress;
-    return;
-  }
 
-  // Rectangle shrinking (back to uniform 1.0)
-  if (t < rectShrinkEnd) {
-    const progress = easeInOutCubic((t - textShrinkEnd) / TIMELINE.rectShrink);
-    const scale = RECT_GROW_SCALE - (RECT_GROW_SCALE - 1) * progress;
     rectOpacity = 1;
     cornerDotsOpacity = 1;
     cornerHandlesOpacity = 1;
-    rectScaleX = scale;
-    rectScaleY = scale;
     rectCurrentBounds = { ...rectInitialBounds };
-    textScale = 1;
     return;
   }
 
-  // Rectangle growing to poster edges (interpolate bounds directly)
-  if (t < growToPosterEnd) {
-    const progress = easeInOutCubic((t - rectShrinkEnd) / TIMELINE.rectGrowToPoster);
+  // The Release: Slow growth to poster edges, locking into place
+  if (t < releaseEnd) {
+    const progress = easeInOutCubic((t - exhaleEnd) / TIMELINE.releaseGrow);
+
     rectOpacity = 1;
     cornerDotsOpacity = 1;
     cornerHandlesOpacity = 1;
-    rectScaleX = 1;  // No scaling, we'll use bounds directly
+    rectScaleX = 1;
     rectScaleY = 1;
 
-    // Interpolate bounds from initial to target (poster edges)
+    // Interpolate bounds from initial to target (poster edges) - "locking into place"
     rectCurrentBounds = {
       x: rectInitialBounds.x + (targetBounds.x - rectInitialBounds.x) * progress,
       y: rectInitialBounds.y + (targetBounds.y - rectInitialBounds.y) * progress,
@@ -686,12 +685,12 @@ function updatePhase1(t) {
     return;
   }
 
-  // Fading out (if enabled)
+  // The Ghosting: Rectangle fades, corner dots remain as floating anchors
   if (rectFadeOutEnabled && t < fadeEnd) {
-    const progress = (t - growToPosterEnd) / TIMELINE.rectFade;
-    rectOpacity = 1 - easeInOutCubic(progress);
-    cornerDotsOpacity = 1;  // Keep dots visible
-    cornerHandlesOpacity = 1 - easeInOutCubic(progress);  // Fade handles with rect
+    const progress = (t - releaseEnd) / TIMELINE.ghostFade;
+    rectOpacity = 1 - easeOutCubic(progress);
+    cornerDotsOpacity = 1;  // Corner dots remain as anchors
+    cornerHandlesOpacity = 1 - easeOutCubic(progress);  // Handles fade with rectangle
     rectScaleX = 1;
     rectScaleY = 1;
     rectCurrentBounds = { ...targetBounds };
@@ -699,11 +698,11 @@ function updatePhase1(t) {
     return;
   }
 
-  // After fade or holding at poster size
+  // After ghosting: Only corner dots remain as anchors
   if (rectFadeOutEnabled) {
     rectOpacity = 0;
-    cornerDotsOpacity = 1;  // Keep dots visible
-    cornerHandlesOpacity = 0;  // Fade handles with rect
+    cornerDotsOpacity = 1;  // Anchor dots remain visible
+    cornerHandlesOpacity = 0;
   } else {
     rectOpacity = 1;
     cornerDotsOpacity = 1;
@@ -715,51 +714,69 @@ function updatePhase1(t) {
   textScale = 1;
 }
 
-// ===== PHASE 2 UPDATE =====
+// ===== PHASE 2 UPDATE: THE CONSTELLATION =====
 
 function updatePhase2(t) {
   const p2 = TIMELINE.phase2Start;
   const appearEnd = p2 + TIMELINE.tangentAppear;
 
   if (t < p2) {
-    tangentDots.forEach(d => d.opacity = 0);
+    tangentDots.forEach(d => {
+      d.opacity = 0;
+      d.twinkle = 0;
+    });
     return;
   }
 
   const overallProgress = Math.min(1, (t - p2) / TIMELINE.tangentAppear);
 
-  // Each dot appears at a different time based on its delay
+  // The Effect: Dots twinkle into existence (ripple of light)
   tangentDots.forEach(d => {
+    // Asynchronous appearance - data points discovered one by one
     const dotProgress = Math.max(0, (overallProgress - d.delay * 0.7) / 0.3);
-    d.opacity = easeOutCubic(Math.min(1, dotProgress));
+    const baseOpacity = easeOutCubic(Math.min(1, dotProgress));
+
+    // Twinkling effect: subtle flicker as they appear (stars flickering)
+    if (baseOpacity > 0 && baseOpacity < 1) {
+      const twinkleFreq = 8 + d.delay * 4;  // Each dot has different twinkle rate
+      const twinkle = Math.sin(t * twinkleFreq) * 0.15;  // Subtle flicker
+      d.opacity = Math.max(0, Math.min(1, baseOpacity + twinkle));
+    } else {
+      d.opacity = baseOpacity;
+    }
   });
 }
 
-// ===== PHASE 3 UPDATE =====
+// ===== PHASE 3 UPDATE: THE INFUSION =====
 
 function updatePhase3(t) {
   const p3 = TIMELINE.phase3Start;
   const fillEnd = p3 + TIMELINE.gradualFill;
-  
+
   if (t < p3) {
     for (const elementName of Object.keys(fillDots)) {
       fillDots[elementName].forEach(d => d.opacity = 0);
     }
     return;
   }
-  
+
   const overallProgress = Math.min(1, (t - p3) / TIMELINE.gradualFill);
-  
+
+  // The Accumulation: Slow sprinkle, like rain on pavement
   for (const elementName of Object.keys(fillDots)) {
     fillDots[elementName].forEach(d => {
-      // Each dot appears based on its delay
-      const dotProgress = Math.max(0, (overallProgress - d.delay * 0.7) / 0.3);
-      d.opacity = easeOutCubic(Math.min(1, dotProgress));
+      // Random dots appear in random spots (not a flood)
+      // Heavy randomization for organic sprinkle effect
+      const dotProgress = Math.max(0, (overallProgress - d.delay * 0.8) / 0.2);
+
+      // Add slight randomness to the easing for more organic feel
+      const randomizedProgress = dotProgress + (Math.random() - 0.5) * 0.05;
+      d.opacity = easeOutCubic(Math.min(1, Math.max(0, randomizedProgress)));
     });
   }
 }
 
-// ===== PHASE 4 UPDATE =====
+// ===== PHASE 4 UPDATE: THE BLOOM =====
 
 function updatePhase4(t) {
   const p4 = TIMELINE.phase4Start;
@@ -779,107 +796,178 @@ function updatePhase4(t) {
 
   const overallProgress = Math.min(1, (t - p4) / TIMELINE.dotsGrow);
 
-  // Update tangent dots (2026) with asynchronous growth
+  // The Expansion: Ink expanding in water / Popcorn popping
+  // Use exponential easing for more dramatic "pop" effect
+  const bloomEase = (p) => {
+    // Starts slow, then explodes outward
+    return p < 0.5 ?
+      2 * p * p :
+      1 - Math.pow(-2 * p + 2, 2) / 2;
+  };
+
+  // The Contrast: 2026 dots balloon aggressively
   tangentDots.forEach(d => {
     const dotProgress = Math.max(0, (overallProgress - d.growthDelay * 0.7) / 0.3);
-    d.scale = 1 + (DOT_GROW_2026 - 1) * easeInOutCubic(Math.min(1, dotProgress));
+    // Aggressive expansion with popping easing
+    d.scale = 1 + (DOT_GROW_2026 - 1) * bloomEase(Math.min(1, dotProgress));
   });
 
-  // Update fill dots with asynchronous growth
+  // Fill dots: 2026 huge, others smaller
   for (const elementName of Object.keys(fillDots)) {
     const targetScale = elementName === 'numbers2026' ? DOT_GROW_2026 : DOT_GROW_OTHER;
     fillDots[elementName].forEach(d => {
       const dotProgress = Math.max(0, (overallProgress - d.growthDelay * 0.7) / 0.3);
-      d.scale = 1 + (targetScale - 1) * easeInOutCubic(Math.min(1, dotProgress));
+      // Use bloom easing for popcorn-like expansion
+      d.scale = 1 + (targetScale - 1) * bloomEase(Math.min(1, dotProgress));
     });
   }
 
-  // Keep global scales for backwards compatibility (use average/max)
+  // Keep global scales for backwards compatibility
   dotScale2026 = 1 + (DOT_GROW_2026 - 1) * overallProgress;
   dotScaleOther = 1 + (DOT_GROW_OTHER - 1) * overallProgress;
 }
 
-// ===== PHASE 5 UPDATE =====
+// ===== PHASE 5 UPDATE: THE RUPTURE & RESURFACING =====
 
 function updatePhase5(t) {
   const p5 = TIMELINE.phase5Start;
-  const fadeEnd = p5 + TIMELINE.textFadeOut;
-  const transformStart = fadeEnd + TIMELINE.floatBeforeTransform;
-  const transformEnd = transformStart + TIMELINE.dotTransform;
-  const blobEnd = transformEnd + TIMELINE.blobForm;
+  const ruptureStart = TIMELINE.phase5Start + TIMELINE.ruptureStart - TIMELINE.phase5Start;
+  const transformEnd = ruptureStart + TIMELINE.ruptureTransform;
+  const resurfaceEnd = transformEnd + TIMELINE.resurfacing;
+  const dissipateEnd = resurfaceEnd + TIMELINE.dissipation;
 
-  // Before phase 5
-  if (t < p5) {
+  // Frame 11: Peak Saturation (recap - end of Phase 4)
+  if (t < ruptureStart) {
     posterOpacity = 1;
     return;
   }
 
-  // Fade out original text
-  if (t < fadeEnd) {
-    const progress = (t - p5) / TIMELINE.textFadeOut;
-    posterOpacity = 1 - easeInOutCubic(progress);
-  } else {
-    posterOpacity = 0;
-  }
+  // Frame 12: The Rupture - Separation of scales begins
+  posterOpacity = 0;  // Original graphics fade instantly at rupture
 
-  // Transform dots (shrink blue dots, after floating for a while)
-  if (t >= transformStart && t < transformEnd) {
-    const overallProgress = (t - transformStart) / TIMELINE.dotTransform;
+  // Transform dots into layers (foam vs residue)
+  if (t < transformEnd) {
+    const transformProgress = (t - ruptureStart) / TIMELINE.ruptureTransform;
 
-    // Update transformation for tangent dots
-    tangentDots.forEach(dot => {
-      if (dot.fate === 'blueSmall') {
-        // Asynchronous transformation with individual delays
-        const dotProgress = Math.max(0, (overallProgress - dot.transformDelay * 0.7) / 0.3);
+    // All dots transform to their assigned roles
+    const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
+    allDots.forEach(dot => {
+      if (dot.fate === 'residue') {
+        // Mid-ground: Blue dots emerge as pixel debris
+        const dotProgress = Math.max(0, (transformProgress - dot.transformDelay * 0.7) / 0.3);
         dot.transformProgress = easeInOutCubic(Math.min(1, dotProgress));
+      } else {
+        // Foreground: White bubbles remain (but prepare for clumping)
+        dot.transformProgress = 0;
       }
     });
-
-    // Update transformation for fill dots
-    for (const elementName of Object.keys(fillDots)) {
-      fillDots[elementName].forEach(dot => {
-        if (dot.fate === 'blueSmall') {
-          // Asynchronous transformation with individual delays
-          const dotProgress = Math.max(0, (overallProgress - dot.transformDelay * 0.7) / 0.3);
-          dot.transformProgress = easeInOutCubic(Math.min(1, dotProgress));
-        }
-      });
-    }
-  } else if (t >= transformEnd) {
-    // Ensure all transformations are complete
-    tangentDots.forEach(dot => {
-      if (dot.fate === 'blueSmall') dot.transformProgress = 1;
+  } else {
+    // Ensure transformation complete
+    const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
+    allDots.forEach(dot => {
+      if (dot.fate === 'residue') {
+        dot.transformProgress = 1;
+      }
     });
-    for (const elementName of Object.keys(fillDots)) {
-      fillDots[elementName].forEach(dot => {
-        if (dot.fate === 'blueSmall') dot.transformProgress = 1;
-      });
+  }
+
+  // Frame 12-13: Physics and layering
+  if (t >= ruptureStart) {
+    const ecosystemTime = t - ruptureStart;
+    const dissipationProgress = Math.min(1, ecosystemTime / TIMELINE.dissipation);
+
+    // Collect all dots for physics
+    const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
+
+    // Separate into layers
+    const foamDots = allDots.filter(d => d.fate === 'foam');
+    const residueDots = allDots.filter(d => d.fate === 'residue');
+
+    // Update each layer
+    foamDots.forEach(dot => updateFoamPhysics(dot, dissipationProgress));
+    residueDots.forEach(dot => updateResiduePhysics(dot, foamDots));
+
+    // Background: Text words emerge
+    updateFloatingWords(t, ruptureStart);
+  }
+}
+
+// Foreground: White bubbles clump into islands and drift
+function updateFoamPhysics(dot, dissipationProgress) {
+  const island = blobCenters[dot.targetIsland];
+
+  // Clumping force (pulls toward island)
+  const dx = island.x - dot.x;
+  const dy = island.y - dot.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist > 10) {
+    dot.vx += (dx / dist) * FOAM_CLUMP_FORCE;
+    dot.vy += (dy / dist) * FOAM_CLUMP_FORCE;
+  }
+
+  // Drift force (slow off-screen movement)
+  dot.vx += dot.driftDirection.x * FOAM_DRIFT_FORCE * dissipationProgress;
+  dot.vy += dot.driftDirection.y * FOAM_DRIFT_FORCE * dissipationProgress;
+
+  // Damping
+  dot.vx *= FOAM_DAMPING;
+  dot.vy *= FOAM_DAMPING;
+
+  // Update position
+  dot.x += dot.vx;
+  dot.y += dot.vy;
+
+  // Fade out over time (dissipation)
+  if (!dot.foamOpacity) dot.foamOpacity = 1;
+  dot.foamOpacity = Math.max(0, 1 - dissipationProgress * WHITE_FADE_RATE * 10);
+}
+
+// Mid-ground: Blue dots follow bubble trails (digital dust/residue)
+function updateResiduePhysics(dot, foamDots) {
+  // Find nearest foam bubble to trail
+  let nearestFoam = null;
+  let minDist = Infinity;
+
+  for (const foam of foamDots) {
+    const dx = foam.x - dot.x;
+    const dy = foam.y - dot.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < minDist && dist < 200) {  // Only trail if within range
+      minDist = dist;
+      nearestFoam = foam;
     }
   }
 
-  // Apply Brownian motion and blob formation (starts after text fades)
-  if (t >= fadeEnd) {
-    const motionProgress = Math.min(1, (t - fadeEnd) / (TIMELINE.floatBeforeTransform + TIMELINE.dotTransform + TIMELINE.blobForm));
+  // Follow the trail of nearest foam
+  if (nearestFoam) {
+    const dx = nearestFoam.x - dot.x;
+    const dy = nearestFoam.y - dot.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
 
-    // Update tangent dots (2026 dots - move to blobs)
-    tangentDots.forEach(dot => {
-      updateDotPhysics2026(dot, motionProgress);
-    });
-
-    // Update fill dots
-    for (const elementName of Object.keys(fillDots)) {
-      fillDots[elementName].forEach(dot => {
-        if (elementName === 'numbers2026') {
-          updateDotPhysics2026(dot, motionProgress);
-        } else {
-          updateDotPhysicsOther(dot);
-        }
-      });
+    if (dist > 5) {
+      // Trail behind the foam (like digital dust)
+      dot.vx += (dx / dist) * RESIDUE_TRAIL_FORCE;
+      dot.vy += (dy / dist) * RESIDUE_TRAIL_FORCE;
     }
-
-    // Update floating words
-    updateFloatingWords(t, fadeEnd);
+  } else {
+    // No foam nearby - gentle drift
+    dot.vx += (random() - 0.5) * 0.1;
+    dot.vy += (random() - 0.5) * 0.1;
   }
+
+  // Higher damping (residue has more friction)
+  dot.vx *= RESIDUE_DAMPING;
+  dot.vy *= RESIDUE_DAMPING;
+
+  // Update position
+  dot.x += dot.vx;
+  dot.y += dot.vy;
+
+  // Constrain to canvas
+  dot.x = constrain(dot.x, 0, BASE_W);
+  dot.y = constrain(dot.y, 0, BASE_H);
 }
 
 function updateFloatingWords(t, fadeEnd) {
@@ -928,67 +1016,40 @@ function updateFloatingWords(t, fadeEnd) {
   });
 }
 
-function updateDotPhysics2026(dot, blobProgress) {
-  // Get target blob center
-  const blob = blobCenters[dot.targetBlob];
+// Background: Text words emerge from grey space (static data layer)
+function updateFloatingWords(t, ruptureStart) {
+  const timeSinceRupture = t - ruptureStart;
+  const emergeStart = WORD_EMERGE_DELAY;
+  const emergeEnd = emergeStart + WORD_EMERGE_DURATION;
 
-  // Calculate direction to blob
-  const dx = blob.x - dot.x;
-  const dy = blob.y - dot.y;
-  const dist = Math.sqrt(dx * dx + dy * dy);
+  floatingWords.forEach(word => {
+    // Frame 13: The Resurfacing - text becomes primary focus
+    if (timeSinceRupture < emergeStart) {
+      word.opacity = 0;
+    } else if (timeSinceRupture < emergeEnd) {
+      // Slow emergence from grey negative space
+      const emergeProgress = (timeSinceRupture - emergeStart) / WORD_EMERGE_DURATION;
+      const wordProgress = Math.max(0, (emergeProgress - word.fadeDelay * 0.7) / 0.3);
+      word.opacity = easeOutCubic(Math.min(1, wordProgress));
+    } else {
+      word.opacity = 1;
+    }
 
-  // Apply attraction force toward blob (increases over time)
-  if (dist > 1) {
-    const attraction = BLOB_ATTRACTION * blobProgress;
-    dot.vx += (dx / dist) * attraction;
-    dot.vy += (dy / dist) * attraction;
-  }
+    // Words are mostly static (background data) - minimal drift
+    if (word.opacity > 0) {
+      word.vx += (random() - 0.5) * WORD_DRIFT;
+      word.vy += (random() - 0.5) * WORD_DRIFT;
+      word.vx *= 0.98;
+      word.vy *= 0.98;
 
-  // Add Brownian motion (random force)
-  dot.vx += (random() - 0.5) * BROWNIAN_FORCE;
-  dot.vy += (random() - 0.5) * BROWNIAN_FORCE;
+      word.x += word.vx;
+      word.y += word.vy;
 
-  // Apply damping (friction)
-  dot.vx *= DAMPING;
-  dot.vy *= DAMPING;
-
-  // Update position
-  dot.x += dot.vx;
-  dot.y += dot.vy;
-
-  // Bounce off edges (more natural than hard constraining)
-  if (dot.x < 0 || dot.x > BASE_W) {
-    dot.vx *= -0.5;
-    dot.x = constrain(dot.x, 0, BASE_W);
-  }
-  if (dot.y < 0 || dot.y > BASE_H) {
-    dot.vy *= -0.5;
-    dot.y = constrain(dot.y, 0, BASE_H);
-  }
-}
-
-function updateDotPhysicsOther(dot) {
-  // Stronger Brownian motion for other dots - free floating
-  dot.vx += (random() - 0.5) * OTHER_DOT_DRIFT;
-  dot.vy += (random() - 0.5) * OTHER_DOT_DRIFT;
-
-  // Apply damping (lighter damping for more freedom)
-  dot.vx *= 0.98;
-  dot.vy *= 0.98;
-
-  // Update position
-  dot.x += dot.vx;
-  dot.y += dot.vy;
-
-  // Bounce off edges instead of constraining (more natural Brownian motion)
-  if (dot.x < 0 || dot.x > BASE_W) {
-    dot.vx *= -0.8;
-    dot.x = constrain(dot.x, 0, BASE_W);
-  }
-  if (dot.y < 0 || dot.y > BASE_H) {
-    dot.vy *= -0.8;
-    dot.y = constrain(dot.y, 0, BASE_H);
-  }
+      // Keep on screen
+      word.x = constrain(word.x, 0, BASE_W);
+      word.y = constrain(word.y, 0, BASE_H);
+    }
+  });
 }
 
 // ===== RENDER =====
@@ -1191,45 +1252,50 @@ function drawDots(dots, globalScale = 1, maxScale = 1, showStroke = true, is2026
     const fate = dot.fate || 'white';
     const transformProgress = dot.transformProgress !== undefined ? dot.transformProgress : 0;
 
-    let fillColor, strokeColor, useStroke, strokeAlpha;
+    let fillColor, strokeColor, useStroke, strokeAlpha, dotOpacity;
 
-    if (fate === 'blueSmall' && transformProgress > 0) {
-      // Interpolate between white (with stroke) and blue (no stroke)
-      const whiteColor = DOT_STYLE.fill;
-      const blueColor = DOT_STYLE.stroke;
+    // Phase 5 layering system
+    if (fate === 'residue' && transformProgress > 0) {
+      // Mid-ground: Blue residue dots (solid blue, small, no stroke)
+      fillColor = DOT_STYLE.stroke;  // Solid blue fill
+      strokeColor = null;
+      useStroke = false;
+      strokeAlpha = 0;
+      dotOpacity = dot.opacity;
 
-      // Lerp fill color from white to blue
-      fillColor = [
-        whiteColor[0] + (blueColor[0] - whiteColor[0]) * transformProgress,
-        whiteColor[1] + (blueColor[1] - whiteColor[1]) * transformProgress,
-        whiteColor[2] + (blueColor[2] - whiteColor[2]) * transformProgress
-      ];
-
-      // Fade out stroke as transformation progresses
-      strokeColor = DOT_STYLE.stroke;
-      useStroke = showStroke && transformProgress < 1;
-      strokeAlpha = 1 - transformProgress;  // Fade out stroke
-
-      // Apply shrink factor to scale based on transformation progress
+      // Shrink dramatically (digital dust/pixel debris)
       const shrinkFactor = is2026 ? BLUE_DOT_SHRINK_2026 : BLUE_DOT_SHRINK_OTHER;
       const targetScale = 1 + (scale - 1) * shrinkFactor;
       scale = scale + (targetScale - scale) * transformProgress;
-    } else {
-      // White dots: white fill, blue stroke (current behavior)
+
+    } else if (fate === 'foam') {
+      // Foreground: White foam bubbles (dissipating)
       fillColor = DOT_STYLE.fill;
       strokeColor = DOT_STYLE.stroke;
       useStroke = showStroke;
       strokeAlpha = 1;
+
+      // Apply foam opacity (fades during dissipation)
+      const foamOpacity = dot.foamOpacity !== undefined ? dot.foamOpacity : 1;
+      dotOpacity = dot.opacity * foamOpacity;
+
+    } else {
+      // Default: White dots with blue stroke
+      fillColor = DOT_STYLE.fill;
+      strokeColor = DOT_STYLE.stroke;
+      useStroke = showStroke;
+      strokeAlpha = 1;
+      dotOpacity = dot.opacity;
     }
 
     push();
-    fill(fillColor[0], fillColor[1], fillColor[2], dot.opacity * 255);
+    fill(fillColor[0], fillColor[1], fillColor[2], dotOpacity * 255);
 
     if (useStroke && strokeColor) {
-      stroke(strokeColor[0], strokeColor[1], strokeColor[2], dot.opacity * 255 * strokeAlpha);
-      // Scale stroke weight: goes from 1x to 2x as dots reach their max scale
+      stroke(strokeColor[0], strokeColor[1], strokeColor[2], dotOpacity * 255 * strokeAlpha);
+      // The Texture: Thick blue outlines for bubble effect
       const progress = maxScale > 1 ? (scale - 1) / (maxScale - 1) : 0;
-      const strokeScale = 1 + progress;  // 1x to 2x
+      const strokeScale = 1 + progress * (STROKE_GROW_MAX - 1);  // 1x to 3.5x
       strokeWeight(DOT_STYLE.strokeWeight * strokeScale);
     } else {
       noStroke();
@@ -1376,6 +1442,22 @@ function easeOutCubic(t) {
 
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+// Breathing easing - mimics organic inhale/exhale with sine wave
+function easeBreath(t) {
+  // Sine wave easing: slow start, accelerate middle, slow end (like a breath)
+  return (Math.sin((t - 0.5) * Math.PI) + 1) / 2;
+}
+
+// Smooth breath in - starts slow, accelerates
+function easeBreathIn(t) {
+  return Math.sin(t * Math.PI / 2);
+}
+
+// Smooth breath out - starts fast, decelerates
+function easeBreathOut(t) {
+  return 1 - Math.cos(t * Math.PI / 2);
 }
 
 // ===== FLOATING WORDS RENDERING =====
