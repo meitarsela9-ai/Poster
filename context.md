@@ -1,20 +1,22 @@
-I'll build this systematically. Let me create the new animation system.Done! To use: rename `sketch-v2.js` to `sketch.js` (or update `index.html` to reference `sketch-v2.js`).
-
----
-
-# SUMMARY FOR CONTINUATION
+# TIMES LANGUAGE 2026 - ANIMATED POSTER
 
 ## Project Overview
-Animated poster for "Times Language 2026" exhibition. Four-phase animation system built in p5.js with dynamic dot growth.
+Animated poster for "Times Language 2026" exhibition. Five-phase animation system built in p5.js with dynamic dot growth, smooth transformations, and emergent behavior patterns.
 
 ## Files Structure
 ```
 p5js/
 ├── index.html          # Entry point
-├── sketch.js           # Main animation
+├── sketch.js           # Main animation (complete 5-phase system)
 ├── export-poster.js    # Utility to export poster as PNG
 ├── export.html         # Export utility page
 └── [assets]            # Required images (see below)
+
+tools/
+├── extract-final.mjs   # Figma circle extractor
+├── extract-text.mjs    # Figma text position extractor
+├── inspect-frames.mjs  # Figma frame inspection tool
+└── analyze-frames-10-13.mjs  # Frame analysis for Phase 5
 ```
 
 ## Required Assets
@@ -24,8 +26,7 @@ p5js/
 - `topBlock.svg` - Top right text block
 - `addressBlock.svg` - Address text
 - `bottomLeft.svg` - Bottom left text
-- `rectangle-lines.svg` - Rectangle SVG reference (Phase 1 now uses p5.js primitives)
-- *(Optional)* `Group 70.svg` - Corner handle icon
+- `text-data.json` - Floating word positions from Figma
 
 ## Environment Variables
 Figma API credentials are stored in `.env` file:
@@ -33,139 +34,226 @@ Figma API credentials are stored in `.env` file:
 - `FILE_KEY` - Figma file key
 - `TARGET_FRAME_ID` - Target frame ID
 
-## Animation Phases
+## Animation Phases (Total: ~2 minutes 15 seconds)
 
-### Phase 1: Rectangle Animation (2.5s - 27.0s)
-- Blue rectangle with corner dots/handles fades in around "Times Language" (2s)
-- Rectangle expands outward uniformly (1.2x scale, 3.5s)
-- Text scales up to 1.15x (3s)
-- Hold at expanded state (2s)
-- Text shrinks back to normal (3s)
-- Rectangle shrinks back to initial size (3.5s)
-- **Rectangle grows to fit poster edges** (with 20px margin, 5s) - slowly and deliberately
-- Rectangle lines fade out (2.5s), **corner dots remain visible**
-- **Implementation**: Rectangle drawn with p5.js primitives (consistent 1px stroke), corner dots/handles drawn separately to stay circular during non-uniform scaling
-- **Note**: Times/Language are rendered dynamically (not in poster layer) to allow smooth scaling
+### Phase 1: The Breath (2.5s - 28.0s)
+A breathing graphic design poster - rectangle breathes around "Times Language"
 
-### Phase 2: Tangent Dots (27.0s - 35.0s)
-- Dots appear at points on "2026" where edges are straight (horizontal/vertical tangents)
-- **Asynchronous appearance**: Each dot has random delay, creating organic rippling effect (8s total)
-- Entrancing, meditative pace
+- Rectangle fades in (2.5s)
+- Inhale: unified expansion of rectangle + text (4.5s)
+- Hold breath at peak (3.0s)
+- Exhale: unified contraction back to origin (4.5s)
+- Release: slow growth to poster edges (7.0s)
+- Ghosting: rectangle fades, corner dots remain as anchors (4.0s)
 
-### Phase 3: Gradual Fill (35.0s - 60.0s)
-- Dots gradually appear on all elements (2026, Times, Language, address, top, bottom)
-- Fills to 30% density (reduced to minimize busyness)
-- **Completely randomized timing**: Dots appear organically with no predictable pattern (25s)
+**Implementation**: Rectangle drawn with p5.js primitives (1px stroke), corner dots/handles drawn separately
+
+### Phase 2: The Constellation (28.0s - 40.0s)
+Stars flickering on a horizon - tangent dots appear on "2026"
+
+- Dots appear at horizontal/vertical tangent points on 2026
+- Asynchronous appearance over 12 seconds
+- Each dot has random delay for organic rippling effect
+- Creates mesmerizing twinkling
+
+### Phase 3: The Infusion (40.0s - 70.0s)
+Slow, creeping density - dots gradually fill all elements
+
+- Dots appear on all elements (2026, Times, Language, address, etc.)
+- **Density**: 15% for 2026 (large), 20% for other text (small)
+- Completely randomized timing over 30 seconds
 - Creates continuous surprise and discovery
 
-### Phase 4: Dot Growth (60.0s - 72.0s)
-- **Asynchronous growth**: Each individual dot grows at its own pace with random delays
-- **All dots grow uniformly at this stage**:
-  - 2026 dots (tangent + fill) grow 11x their original size
-  - Other dots (times, language, address, top, bottom) grow 4x their original size
-- Blue borders (stroke) grow from 1x to 2x thickness as dots expand
-- Wave-like effect as different dots reach full size at different times (12s)
+### Phase 4: The Bloom (70.0s - 88.0s)
+Ink expanding in water / Popcorn popping
 
-### Phase 5: Transformation and Brownian Motion (72.0s+)
-- **Text Fade Out** (72.0s - 75.0s): Original text/graphics fade out slowly (3s)
-- **Floating Period** (75.0s - 90.0s): Dots float freely for 15 seconds
-  - White dots lose blue stroke as posterOpacity reaches 0
-  - 2026 dots begin gentle movement toward blob centers
-  - Other dots drift with Brownian motion
-  - No visual changes yet - just peaceful floating
-- **Dot Transformation** (90.0s - 95.0s): 30% of dots transform over 5 seconds
-  - **Fate Assignment**: At start of Phase 5, each dot randomly assigned one of two fates:
-    - 70% stay white (white fill, no stroke after text fades)
-    - 30% transform to blue (gradually change from white to blue fill)
-  - **Asynchronous transformation**: Each transforming dot has individual delay for organic wave-like effect
-  - **Shrinking**: As dots turn blue, they shrink:
-    - 2026 blue dots shrink to 40% of their grown size
-    - Other blue dots shrink to 50% of their grown size
-  - **Color transition**: Dots smoothly interpolate from white to blue fill
-- **Continued Brownian Motion** (95.0s - 115.0s): Blob formation continues
-  - 2026 dots continue moving toward blob centers
-  - Other dots continue drifting freely
-  - Very slow, organic movement (20s total blob formation time)
+- **Asynchronous growth**: Each dot grows at its own pace (18s)
+- **Large bubbles** (2026): grow 13x original size
+- **Small bubbles** (other text): grow 5x original size
+- Stroke weight scales from 1.2x to 3.5x as dots expand
+- Wave-like effect, peak saturation
 
-## Key Configuration (top of sketch.js)
+### Phase 5: Transformation & Emergence (88.0s+)
+Smooth metamorphosis with emergent behavior - the ecosystem reveals itself
+
+#### Visual Transformations (smooth, no popping):
+- **Poster fade** (88.0s): Original graphics fade out instantly
+- **Floating starts** (88.0s+): All dots begin Brownian motion with personalities
+- **Blue transformation** (96.0s - 108.0s):
+  - 70% of small dots smoothly transition white → blue (12s)
+  - Smooth color interpolation (no popping)
+  - Blue dots shrink to 25% of small white size
+- **Stroke fade** (100.0s - 115.0s):
+  - ALL dots gradually lose blue outlines (15s)
+  - Final state: pure white and pure blue (no strokes)
+- **Text emerges** (96.0s - 104.0s): Background text layer fades in (8s)
+
+#### Three Distinct Bubble Sizes:
+1. **Large white bubbles** (from 2026): Always stay white, lose stroke
+2. **Small white bubbles** (from other text): 30% stay white, lose stroke
+3. **Tiny blue dots** (from other text): 70% transform to blue, lose stroke
+
+#### Emergent Behavior - Dot Personalities:
+Each dot assigned personality at Phase 5 start (like Conway's Game of Life):
+
+- **15% Leaders** (1.8x speed): Move fast, ignore others, blaze trails
+- **30% Followers** (1.0x speed): Attracted to nearby leaders, create streams
+- **20% Loners** (1.2x speed): Repelled when crowded (>8 neighbors), prevent blobs
+- **35% Wanderers** (0.9x speed): Ignore everyone, drift randomly
+
+**Result**: Organic trails, dynamic groupings, dots with "life" - no concentric circles
+
+## Key Configuration
 
 ```javascript
 const TIMELINE = {
   phase1Start: 2.5,
-  rectForm: 2.0,          // Slower, more deliberate
-  rectGrow: 3.5,
-  textGrow: 3.0,
-  holdExpanded: 2.0,
-  textShrink: 3.0,
-  rectShrink: 3.5,
-  rectGrowToPoster: 5.0,  // Very slow growth to poster edges
-  rectFade: 2.5,          // Slow fade
-  phase2Start: 27.0,      // After phase 1 completes
-  tangentAppear: 8.0,     // Very slow asynchronous appearance
-  phase3Start: 35.0,      // 27.0 + 8.0
-  gradualFill: 25.0,      // Very slow, entrancing fill
-  phase4Start: 60.0,          // 35.0 + 25.0
-  dotsGrow: 12.0,             // Slow asynchronous growth
-  phase5Start: 72.0,          // 60.0 + 12.0
-  textFadeOut: 3.0,           // Text fades out
-  floatBeforeTransform: 15.0, // Dots float peacefully before transforming
-  dotTransform: 5.0,          // Dots transform to blue/shrink
-  blobForm: 20.0,             // Blob formation
-  holdFinal: 10.0
+  rectForm: 2.5,
+  breathInhale: 4.5,
+  breathHold: 3.0,
+  breathExhale: 4.5,
+  releaseGrow: 7.0,
+  ghostFade: 4.0,
+
+  phase2Start: 28.0,
+  tangentAppear: 12.0,
+
+  phase3Start: 40.0,
+  gradualFill: 30.0,
+
+  phase4Start: 70.0,
+  dotsGrow: 18.0,
+
+  phase5Start: 88.0,
+  blueTransformStart: 8.0,
+  blueTransformDuration: 12.0,
+  strokeFadeStart: 12.0,
+  strokeFadeDuration: 15.0,
+  textEmergeStart: 8.0,
+  textEmergeDuration: 8.0,
+
+  holdFinal: 20.0
 };
 
-const RECT_PADDING = 30;              // Padding around Times/Language (prevents dot overlap)
-const RECT_GROW_SCALE = 1.2;          // Rectangle uniform expansion multiplier
-const TEXT_GROW_SCALE = 1.15;         // Text expansion (smaller than rectangle)
-const RECT_POSTER_MARGIN = 20;        // Margin from poster edges in final position
-const FILL_TARGET = 0.3;              // 30% edge fill (reduced to minimize busyness)
-const TANGENT_THRESHOLD = 0.15;       // Lower = more tangent points
-const DOT_GROW_2026 = 11;             // 2026 white dots grow 11x
-const DOT_GROW_OTHER = 4;             // Other white dots grow 4x
-const BLUE_DOT_PERCENTAGE = 0.3;      // 30% of dots turn blue and shrink
-const BLUE_DOT_SHRINK_2026 = 0.4;     // Blue 2026 dots are 40% size of white dots
-const BLUE_DOT_SHRINK_OTHER = 0.5;    // Blue other dots are 50% size of white dots
-const rectFadeOutEnabled = true;      // Rectangle lines fade out, dots stay visible
+// Dot density
+const FILL_TARGET = 0.15;           // 15% fill for 2026 (large bubbles)
+const FILL_TARGET_SMALL = 0.2;      // 20% fill for small text
+const TANGENT_DOT_RADIUS = 3;       // Same as fill dots (uniform size)
+const FILL_DOT_RADIUS = 3;
+
+// Dot growth
+const DOT_GROW_2026 = 13;           // Large bubbles grow 13x
+const DOT_GROW_OTHER = 5;           // Small bubbles grow 5x
+const STROKE_GROW_MAX = 3.5;        // Stroke grows 3.5x at peak
+
+// Transformation
+const BLUE_DOT_PERCENTAGE = 0.7;    // 70% of small dots turn blue
+const BLUE_DOT_SHRINK_OTHER = 0.25; // Blue dots shrink to 25% of small white
+
+// Emergent behavior
+const BASE_SPEED = 0.12;            // Base Brownian motion
+const KINSHIP_RADIUS = 100;         // How far dots "feel" their kin
+const LEADER_SPEED = 1.8;           // Leaders move 1.8x faster
+const FOLLOWER_ATTRACT = 0.025;     // Followers attracted to leaders
+const LONER_REPEL = 0.04;           // Loners repelled when crowded
+const CROWDING_THRESHOLD = 8;       // Too many neighbors = crowded
 ```
 
-## Edge Detection Thresholds
-For images with glow/blur (like 2026.png), use higher thresholds:
+## Sampling Strategy (for performance & aesthetics)
+
+```javascript
+// Edge sampling spacing (pixels between dots)
+allEdges.numbers2026 = sampleEdges(..., 25);      // Very few large dots
+allEdges.times = sampleEdges(..., 6);             // Moderate small dots
+allEdges.language = sampleEdges(..., 6);
+allEdges.address = sampleEdges(..., 6);
+allEdges.topBlock = sampleEdges(..., 6);
+allEdges.bottomLeft = sampleEdges(..., 6);
+
+// Tangent detection
+const spacing = 25;  // Check every 25 pixels (fewer tangent dots)
+```
+
+## Technical Implementation
+
+### Edge Detection
 ```javascript
 const EDGE_THRESHOLDS = {
-  numbers2026: { solid: 200, empty: 180 },  // High = ignores glow
+  numbers2026: { solid: 200, empty: 180 },  // High threshold for glow
   times:       { solid: 128, empty: 100 },
+  language:    { solid: 128, empty: 100 },
   // ...
 };
 ```
 
-## Technical Notes
+### Key Features
+1. **Phase 1 Rectangle**: p5.js primitives, corner dots stay circular during scaling
+2. **Dynamic Text Rendering**: Times/Language rendered every frame for smooth scaling
+3. **Edge Tracing**: Scans image pixels for alpha transitions
+4. **Asynchronous Appearance**: Each dot has individual `delay` property
+5. **Asynchronous Growth**: Each dot has individual `scale` and `growthDelay`
+6. **Smooth Transformations**: Color interpolation (white → blue), no popping
+7. **Personality System**: Each dot assigned personality for emergent behavior
+8. **Screen Wrapping**: Dots wrap around edges for freedom of movement
+9. **Floating Words**: Background text layer from Figma positions
 
-1. **Phase 1 Rectangle**: Drawn with p5.js `rect()` primitives (not SVG) for consistent 1px stroke during non-uniform scaling. Corner dots and handles drawn separately to stay circular. Rectangle animates from initial bounds around Times/Language to poster edges (with margin). Rectangle lines fade out while corner dots remain visible.
-2. **Dynamic Text Rendering**: Times/Language are NOT in poster layer - rendered every frame with transform scaling for smooth animation
-3. **Edge Tracing**: Scans image pixels, finds where alpha transitions from solid to transparent
-4. **Tangent Detection**: Analyzes local edge direction, selects points where edge is mostly horizontal or vertical
-5. **Sampling**: Grid-based sampling ensures even dot distribution
-6. **Asynchronous Dot Appearance**: Each dot has individual random `delay` property (0-1). Dots appear organically over extended periods creating continuous surprise.
-7. **Asynchronous Dot Growth**: Each dot has individual `scale` and `growthDelay` properties. Dots grow at their own pace creating wave-like patterns. All 2026 dots grow 11x, all other dots grow 4x. Stroke weight scales from 1x to 2x as dots grow.
-8. **Dot Fate Assignment**: At start of Phase 5, each dot randomly assigned a `fate` property: 70% stay 'white', 30% become 'blueSmall'. Each transforming dot gets random `transformDelay` for asynchronous transformation.
-9. **Dot Transformation**: During Phase 5 (after text fade), 30% of dots gradually transform over 5s: fill color interpolates from white to blue, stroke fades out, size shrinks (2026 dots to 40%, other dots to 50% of grown size). Each dot transforms at its own pace based on `transformDelay`.
-10. **Phase 5 Blob Formation**: Dots float peacefully for 15s after text fades, then 30% transform to blue/shrink over 5s. 2026 dots move toward 5 blob centers with attraction force and Brownian motion throughout Phase 5. Other dots drift freely. Final state: 70% white dots (no stroke), 30% smaller blue dots (solid blue).
-11. **Animation Timing**: Slow, entrancing pace designed to mesmerize viewers. Total runtime: ~125 seconds (~2 minutes 5 seconds)
+### Dot Properties
+Each dot tracks:
+- `x, y` - Position
+- `r` - Radius
+- `opacity` - Visibility (0-1)
+- `delay` - Appearance delay (Phase 2/3)
+- `growthDelay` - Growth delay (Phase 4)
+- `scale` - Individual scale factor
+- `fate` - 'foam' (white) or 'residue' (blue)
+- `isLarge` - true for 2026 dots, false for others
+- `transformProgress` - Color transition progress (0-1)
+- `strokeOpacity` - Stroke visibility (0-1)
+- `personality` - 'leader', 'follower', 'loner', 'wanderer'
+- `speedMultiplier` - Movement speed multiplier
+- `vx, vy` - Velocity (Phase 5)
 
 ## How to Run
+
 ```bash
 cd p5js
 npx serve .
 # Open http://localhost:3000
 ```
 
-## Figma Integration (Optional)
-Tools in `/tools/` folder can extract dot coordinates from Figma:
-- `extract-final.mjs` - Extracts circles from Figma file
-- Uses environment variables from `.env` for credentials (see Environment Variables section)
-- Install dotenv: `npm install dotenv`
-- Run: `node tools/extract-final.mjs`
+## Figma Integration
+
+The project includes tools to analyze Figma frames:
+
+```bash
+cd tools
+node inspect-frames.mjs       # List all frames
+node analyze-frames-10-13.mjs # Analyze frames 10-13 in detail
+node extract-text.mjs         # Extract text positions
+```
+
+## Design Philosophy
+
+**Pacing**: Consistent, captivating rhythm throughout (~2m 15s total)
+- No jarring fast sections
+- Each phase unfolds at a mesmerizing pace
+- Longer durations allow appreciation of transformations
+
+**Visual Hierarchy**: Three clear bubble sizes
+- Large white (imposing presence)
+- Small white (supporting layer)
+- Tiny blue (detail/texture)
+
+**Emergence**: Simple personality rules create complex patterns
+- No concentric circles or uniform blobs
+- Organic trails and dynamic groupings
+- Dots with "life" - temporary formations that form and dissolve
+
+**Smooth Transitions**: Everything transforms gradually
+- No popping or disappearing
+- Color interpolation (not sudden switches)
+- Stroke fades applied to all dots uniformly
 
 ## Security
-- API keys are stored in `.env` file (NOT committed to git)
+- API keys stored in `.env` file (NOT committed to git)
 - `.gitignore` excludes `.env` and sensitive files

@@ -32,34 +32,37 @@ const GLOW_BLUR_PX = 35;
 const TIMELINE = {
   // Phase 1: The Breath - A breathing graphic design poster
   phase1Start: 2.5,
-  rectForm: 2.0,        // The setup: rectangle fades in
-  breathInhale: 4.0,    // The breath (inhale): unified expansion of rectangle + text
-  breathHold: 2.5,      // The breath (hold): pause at peak inflation
-  breathExhale: 4.0,    // The breath (exhale): unified contraction back to origin
-  releaseGrow: 6.0,     // The release: slow growth to poster edges, locking into place
-  ghostFade: 3.0,       // The ghosting: rectangle fades, corner dots remain as anchors
+  rectForm: 2.5,        // The setup: rectangle fades in (slower)
+  breathInhale: 4.5,    // The breath (inhale): unified expansion of rectangle + text
+  breathHold: 3.0,      // The breath (hold): pause at peak inflation
+  breathExhale: 4.5,    // The breath (exhale): unified contraction back to origin
+  releaseGrow: 7.0,     // The release: slow growth to poster edges, locking into place
+  ghostFade: 4.0,       // The ghosting: rectangle fades, corner dots remain as anchors
 
   // Phase 2: The Constellation - Stars flickering on a horizon
-  phase2Start: 27.0,    // The shift: 2026 begins to be analyzed
-  tangentAppear: 8.0,   // Dots twinkle into existence along tangents (ripple of light)
+  phase2Start: 28.0,    // The shift: 2026 begins to be analyzed
+  tangentAppear: 12.0,  // Dots twinkle into existence - slower, more mesmerizing
 
   // Phase 3: The Infusion - A slow, creeping density
-  phase3Start: 35.0,    // The accumulation begins
-  gradualFill: 25.0,    // Slow sprinkle, like rain on pavement
+  phase3Start: 40.0,    // The accumulation begins
+  gradualFill: 30.0,    // Slow sprinkle, like rain on pavement - even slower
 
   // Phase 4: The Bloom - Ink expanding in water / Popcorn popping
-  phase4Start: 60.0,    // The expansion: data points inflate
-  dotsGrow: 12.0,       // Aggressive balloon expansion, bubbles form
+  phase4Start: 70.0,    // The expansion: data points inflate
+  dotsGrow: 18.0,       // Slower bloom - more gradual expansion
 
-  // Phase 5: The Rupture & Resurfacing - Layered ecosystem
-  phase5Start: 72.0,    // Frame 11: Peak Saturation (end of bloom)
-  ruptureStart: 75.0,   // Frame 12: The Rupture - separation of scales begins
-  ruptureTransform: 4.0, // Blue dots emerge as residue/pixel debris
-  resurfacing: 8.0,     // Frame 13: The Resurfacing - text becomes primary
-  dissipation: 15.0,    // White bubbles drift off-screen, blue dots bridge
+  // Phase 5: Smooth transformations (no popping)
+  phase5Start: 88.0,            // Start floating and transforming
+  floatStart: 0.0,              // Brownian motion starts immediately
+  blueTransformStart: 8.0,      // Small dots start turning blue (delayed more)
+  blueTransformDuration: 12.0,  // Smooth color change white → blue (slower)
+  strokeFadeStart: 12.0,        // Strokes start fading (delayed more)
+  strokeFadeDuration: 15.0,     // Gradual stroke removal (slower)
+  textEmergeStart: 8.0,         // Text emerges
+  textEmergeDuration: 8.0,      // Text fade duration (slower)
 
   // End
-  holdFinal: 10.0       // Ecosystem stabilizes
+  holdFinal: 20.0               // Ecosystem stabilizes (longer)
 };
 
 // ===== DOT SETTINGS =====
@@ -77,9 +80,10 @@ const TEXT_GROW_SCALE = 1.15; // how much text grows (smaller than rectangle)
 const RECT_POSTER_MARGIN = 20; // margin from poster edges when rectangle grows to poster size
 
 const TANGENT_THRESHOLD = 0.15;  // how "straight" an edge must be (lower = more points)
-const TANGENT_DOT_RADIUS = 4;
+const TANGENT_DOT_RADIUS = 3;  // Same as fill dots for consistent large bubble size
 
-const FILL_TARGET = 0.3;  // 30% fill (reduced further to decrease busyness)
+const FILL_TARGET = 0.15;  // 15% fill for 2026 - fewer large bubbles
+const FILL_TARGET_SMALL = 0.2;  // 20% fill for small text - even less noise
 const FILL_DOT_RADIUS = 3;
 
 // Phase 4: The Bloom - Aggressive expansion contrast
@@ -88,17 +92,22 @@ const DOT_GROW_OTHER = 5;  // Other dots grow but stay smaller
 const STROKE_GROW_MAX = 3.5;  // Thick blue outlines at peak (bubble texture)
 
 // The Rupture: Separation of scales
-const BLUE_DOT_PERCENTAGE = 0.3;  // 30% become residue (digital dust)
-const BLUE_DOT_SHRINK_2026 = 0.25;  // Blue dots shrink dramatically (pixel debris)
-const BLUE_DOT_SHRINK_OTHER = 0.3;  // Small solid blue dots (residue)
+const BLUE_DOT_PERCENTAGE = 0.7;  // 70% become blue dots (more blue dots)
+const BLUE_DOT_SHRINK_2026 = 0.25;  // Not used (2026 dots stay white)
+const BLUE_DOT_SHRINK_OTHER = 0.25;  // Blue dots shrink to 25% of small white size (even smaller)
 const WHITE_FADE_RATE = 0.015;  // White bubbles slowly fade/dissipate
 
-// Phase 5: The Rupture & Resurfacing
-const FOAM_CLUMP_FORCE = 0.08;  // White bubbles clump into islands
-const FOAM_DRIFT_FORCE = 0.15;  // White bubbles drift off-screen
-const RESIDUE_TRAIL_FORCE = 0.25;  // Blue dots follow bubble trails (digital dust)
-const RESIDUE_DAMPING = 0.92;  // Blue dots have more friction (residue feel)
-const FOAM_DAMPING = 0.96;  // White bubbles drift more freely
+// Phase 5: Emergent behavior - dots have personalities
+const BASE_SPEED = 0.12;              // Base Brownian motion
+const FLOAT_DAMPING = 0.97;           // Light damping
+const KINSHIP_RADIUS = 100;           // How far dots "feel" their kin
+const CROWDING_THRESHOLD = 8;         // Too many neighbors = crowded
+
+// Personality forces
+const LEADER_SPEED = 1.8;             // Leaders move faster
+const FOLLOWER_ATTRACT = 0.025;       // Followers attracted to kin
+const LONER_REPEL = 0.04;             // Loners repelled when crowded
+const WANDERER_IGNORE = 0.0;          // Wanderers ignore others
 
 // Phase 5: Background Data Layer (floating words)
 const WORD_EMERGE_DELAY = 3.0;  // Words emerge after rupture begins
@@ -280,12 +289,12 @@ function initPhase2() {
 
 function findTangentPoints(edges, threshold, radius) {
   const tangentPoints = [];
-  
+
   // Create a spatial map for quick neighbor lookup
   const edgeSet = new Set(edges.map(e => `${e.x},${e.y}`));
-  
+
   // Sample edges and check local direction
-  const spacing = 8;  // check every N pixels
+  const spacing = 25;  // Very wide spacing to heavily reduce tangent dots (very few large dots)
   const checked = new Set();
   
   for (const edge of edges) {
@@ -346,20 +355,23 @@ function findTangentPoints(edges, threshold, radius) {
 // ===== PHASE 3: GRADUAL FILL INITIALIZATION =====
 
 function initPhase3() {
-  console.log("Initializing Phase 3: Gradual fill to 60%");
-  
+  console.log("Initializing Phase 3: Gradual fill");
+
   // Trace all edges
   traceAllEdges();
-  
-  // Sample 60% of edges for each element
+
+  // Sample edges for each element (different percentages for 2026 vs others)
   for (const elementName of Object.keys(allEdges)) {
     const edges = allEdges[elementName];
-    const targetCount = Math.floor(edges.length * FILL_TARGET);
-    
+
+    // Use different fill targets: less for 2026 (large), more for others (small)
+    const fillTarget = elementName === 'numbers2026' ? FILL_TARGET : FILL_TARGET_SMALL;
+    const targetCount = Math.floor(edges.length * fillTarget);
+
     // Randomly sample edges
     const shuffled = [...edges].sort(() => Math.random() - 0.5);
     const sampled = shuffled.slice(0, targetCount);
-    
+
     // Create dots with random staggered appearance times
     sampled.forEach((edge, i) => {
       fillDots[elementName].push({
@@ -374,38 +386,34 @@ function initPhase3() {
         transformProgress: 0  // 0 = white, 1 = fully transformed to blue
       });
     });
-    
-    console.log(`  ${elementName}: ${fillDots[elementName].length} fill dots (${Math.round(FILL_TARGET * 100)}% of ${edges.length})`);
+
+    console.log(`  ${elementName}: ${fillDots[elementName].length} fill dots (${Math.round(fillTarget * 100)}% of ${edges.length})`);
   }
 }
 
 function traceAllEdges() {
-  // Numbers 2026
+  // Numbers 2026 - heavily reduce density (very few large bubbles)
   const numbersG = createGraphics(BASE_W, BASE_H);
   numbersG.pixelDensity(1);
   numbersG.clear();
   numbersG.image(numbersImg, 0, 0, BASE_W, BASE_H);
-  allEdges.numbers2026 = sampleEdges(traceEdgesFromGraphics(numbersG, EDGE_THRESHOLDS.numbers2026), 4);
-  
-  // Times
+  allEdges.numbers2026 = sampleEdges(traceEdgesFromGraphics(numbersG, EDGE_THRESHOLDS.numbers2026), 25);  // Even wider spacing
+
+  // Small text elements - sparse to avoid noise
   const timesG = renderElementToGraphics(timesImg, items.times);
-  allEdges.times = sampleEdges(traceEdgesFromGraphics(timesG, EDGE_THRESHOLDS.times), 3);
-  
-  // Language
+  allEdges.times = sampleEdges(traceEdgesFromGraphics(timesG, EDGE_THRESHOLDS.times), 6);
+
   const langG = renderElementToGraphics(langImg, items.lang);
-  allEdges.language = sampleEdges(traceEdgesFromGraphics(langG, EDGE_THRESHOLDS.language), 3);
-  
-  // Address
+  allEdges.language = sampleEdges(traceEdgesFromGraphics(langG, EDGE_THRESHOLDS.language), 6);
+
   const addrG = renderElementToGraphics(addrSVG, items.addr);
-  allEdges.address = sampleEdges(traceEdgesFromGraphics(addrG, EDGE_THRESHOLDS.address), 3);
-  
-  // Top block
+  allEdges.address = sampleEdges(traceEdgesFromGraphics(addrG, EDGE_THRESHOLDS.address), 6);
+
   const topG = renderElementToGraphics(topSVG, items.top);
-  allEdges.topBlock = sampleEdges(traceEdgesFromGraphics(topG, EDGE_THRESHOLDS.topBlock), 3);
-  
-  // Bottom left
+  allEdges.topBlock = sampleEdges(traceEdgesFromGraphics(topG, EDGE_THRESHOLDS.topBlock), 6);
+
   const botG = renderElementToGraphics(botLSVG, items.botL);
-  allEdges.bottomLeft = sampleEdges(traceEdgesFromGraphics(botG, EDGE_THRESHOLDS.bottomLeft), 3);
+  allEdges.bottomLeft = sampleEdges(traceEdgesFromGraphics(botG, EDGE_THRESHOLDS.bottomLeft), 6);
 }
 
 function sampleEdges(edges, spacing) {
@@ -431,70 +439,70 @@ function sampleEdges(edges, spacing) {
 function initPhase5() {
   console.log("Initializing Phase 5: The Rupture & Resurfacing");
 
-  // Create island clump centers (white bubbles will clump here)
-  blobCenters = [
-    { x: BASE_W * 0.25, y: BASE_H * 0.3 },   // Island 1
-    { x: BASE_W * 0.7, y: BASE_H * 0.25 },   // Island 2
-    { x: BASE_W * 0.4, y: BASE_H * 0.65 },   // Island 3
-    { x: BASE_W * 0.8, y: BASE_H * 0.75 }    // Island 4
-  ];
-
-  // Add randomness to island positions
-  blobCenters.forEach(blob => {
-    blob.x += random(-BASE_W * 0.1, BASE_W * 0.1);
-    blob.y += random(-BASE_H * 0.1, BASE_H * 0.1);
-  });
-
-  // Assign dots their layer roles
+  // Assign dots their layer roles and personalities
+  // Large bubbles (2026) ALWAYS stay white - never transform to blue
   tangentDots.forEach(dot => {
-    dot.vx = 0;
-    dot.vy = 0;
-
-    // The Rupture: 30% become blue residue, 70% stay white foam
-    dot.fate = Math.random() < BLUE_DOT_PERCENTAGE ? 'residue' : 'foam';
+    // Large bubbles from 2026 stay white (foam)
+    dot.fate = 'foam';
+    dot.isLarge = true;  // Mark as large bubble
     dot.transformDelay = Math.random();
 
-    if (dot.fate === 'foam') {
-      // Foreground: White bubbles clump into islands
-      dot.targetIsland = floor(random(blobCenters.length));
-      dot.driftDirection = {
-        x: random(-1, 1),
-        y: random(-1, 1)
-      };
-    } else {
-      // Mid-ground: Blue dots follow trails (will track nearby foam)
-      dot.trailTarget = null;  // Will be set dynamically
-    }
+    // Assign personality (emergent behavior)
+    assignPersonality(dot);
   });
 
   // Same for fill dots
   for (const elementName of Object.keys(fillDots)) {
     fillDots[elementName].forEach(dot => {
-      dot.vx = 0;
-      dot.vy = 0;
+      // Large bubbles (2026) stay white, small bubbles (other) can transform to blue
+      if (elementName === 'numbers2026') {
+        // Large bubbles from 2026 ALWAYS stay white
+        dot.fate = 'foam';
+        dot.isLarge = true;  // Mark as large bubble
+      } else {
+        // Small bubbles: 70% transform to even smaller blue dots
+        dot.fate = Math.random() < BLUE_DOT_PERCENTAGE ? 'residue' : 'foam';
+        dot.isLarge = false;  // Mark as small bubble
+      }
 
-      dot.fate = Math.random() < BLUE_DOT_PERCENTAGE ? 'residue' : 'foam';
       dot.transformDelay = Math.random();
 
-      if (dot.fate === 'foam') {
-        dot.targetIsland = floor(random(blobCenters.length));
-        dot.driftDirection = {
-          x: random(-1, 1),
-          y: random(-1, 1)
-        };
-      } else {
-        dot.trailTarget = null;
-      }
+      // Assign personality (emergent behavior)
+      assignPersonality(dot);
     });
   }
 
   // Background: Floating words (data layer)
   initFloatingWords();
 
-  console.log(`  Created 3-layer ecosystem:`);
-  console.log(`    - Foreground (Foam): White bubble islands`);
-  console.log(`    - Mid-ground (Residue): Blue particle trails`);
-  console.log(`    - Background (Data): ${floatingWords.length} text words`);
+  console.log(`  Fate assignment complete:`);
+  console.log(`    - Large white bubbles (2026): stay white`);
+  console.log(`    - Small white bubbles: 30% stay white`);
+  console.log(`    - Small blue dots: 70% transform to blue`);
+  console.log(`    - Background text: ${floatingWords.length} words`);
+}
+
+// Assign personality to each dot (like Conway's Game of Life - simple rules, complex behavior)
+function assignPersonality(dot) {
+  const roll = Math.random();
+
+  if (roll < 0.15) {
+    // 15% Leaders - move fast, others follow them
+    dot.personality = 'leader';
+    dot.speedMultiplier = LEADER_SPEED;
+  } else if (roll < 0.45) {
+    // 30% Followers - attracted to nearby kin
+    dot.personality = 'follower';
+    dot.speedMultiplier = 1.0;
+  } else if (roll < 0.65) {
+    // 20% Loners - repelled by crowding
+    dot.personality = 'loner';
+    dot.speedMultiplier = 1.2;
+  } else {
+    // 35% Wanderers - ignore others, just drift
+    dot.personality = 'wanderer';
+    dot.speedMultiplier = 0.9;
+  }
 }
 
 function initFloatingWords() {
@@ -827,148 +835,161 @@ function updatePhase4(t) {
   dotScaleOther = 1 + (DOT_GROW_OTHER - 1) * overallProgress;
 }
 
-// ===== PHASE 5 UPDATE: THE RUPTURE & RESURFACING =====
+// ===== PHASE 5 UPDATE: SMOOTH TRANSFORMATIONS =====
 
 function updatePhase5(t) {
   const p5 = TIMELINE.phase5Start;
-  const ruptureStart = TIMELINE.phase5Start + TIMELINE.ruptureStart - TIMELINE.phase5Start;
-  const transformEnd = ruptureStart + TIMELINE.ruptureTransform;
-  const resurfaceEnd = transformEnd + TIMELINE.resurfacing;
-  const dissipateEnd = resurfaceEnd + TIMELINE.dissipation;
 
-  // Frame 11: Peak Saturation (recap - end of Phase 4)
-  if (t < ruptureStart) {
+  // Before Phase 5
+  if (t < p5) {
     posterOpacity = 1;
     return;
   }
 
-  // Frame 12: The Rupture - Separation of scales begins
-  posterOpacity = 0;  // Original graphics fade instantly at rupture
+  // Poster fades out
+  posterOpacity = 0;
 
-  // Transform dots into layers (foam vs residue)
-  if (t < transformEnd) {
-    const transformProgress = (t - ruptureStart) / TIMELINE.ruptureTransform;
+  const timeSinceP5 = t - p5;
+  const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
 
-    // All dots transform to their assigned roles
-    const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
-    allDots.forEach(dot => {
-      if (dot.fate === 'residue') {
-        // Mid-ground: Blue dots emerge as pixel debris
-        const dotProgress = Math.max(0, (transformProgress - dot.transformDelay * 0.7) / 0.3);
+  // Calculate progress for each transformation
+  const blueStart = TIMELINE.blueTransformStart;
+  const blueEnd = blueStart + TIMELINE.blueTransformDuration;
+  const strokeStart = TIMELINE.strokeFadeStart;
+  const strokeEnd = strokeStart + TIMELINE.strokeFadeDuration;
+
+  // 1. SMOOTH COLOR TRANSFORMATION (white → blue for small dots)
+  allDots.forEach(dot => {
+    if (dot.fate === 'residue' && !dot.isLarge) {
+      // Small dots transforming to blue
+      if (timeSinceP5 < blueStart) {
+        dot.transformProgress = 0;  // Still white
+      } else if (timeSinceP5 < blueEnd) {
+        // Smooth transition with individual delays
+        const progress = (timeSinceP5 - blueStart) / TIMELINE.blueTransformDuration;
+        const dotProgress = Math.max(0, (progress - dot.transformDelay * 0.7) / 0.3);
         dot.transformProgress = easeInOutCubic(Math.min(1, dotProgress));
       } else {
-        // Foreground: White bubbles remain (but prepare for clumping)
-        dot.transformProgress = 0;
+        dot.transformProgress = 1;  // Fully blue
       }
-    });
-  } else {
-    // Ensure transformation complete
-    const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
-    allDots.forEach(dot => {
-      if (dot.fate === 'residue') {
-        dot.transformProgress = 1;
+    } else {
+      // Large dots and small white dots stay white
+      dot.transformProgress = 0;
+    }
+  });
+
+  // 2. SMOOTH STROKE FADE (all dots lose their outlines)
+  allDots.forEach(dot => {
+    if (timeSinceP5 < strokeStart) {
+      dot.strokeOpacity = 1;  // Strokes visible
+    } else if (timeSinceP5 < strokeEnd) {
+      // Smooth fade
+      const progress = (timeSinceP5 - strokeStart) / TIMELINE.strokeFadeDuration;
+      dot.strokeOpacity = 1 - easeOutCubic(progress);
+    } else {
+      dot.strokeOpacity = 0;  // No strokes
+    }
+  });
+
+  // 3. EMERGENT BEHAVIOR - personality-based interactions
+  allDots.forEach(dot => {
+    // Initialize velocity if needed
+    if (dot.vx === undefined) dot.vx = 0;
+    if (dot.vy === undefined) dot.vy = 0;
+
+    // Determine dot type for kinship
+    const isBlue = dot.fate === 'residue' && dot.transformProgress > 0.5;
+    const isSmallWhite = !dot.isLarge && !isBlue;
+    const isLargeWhite = dot.isLarge;
+
+    // Find nearby kin (same type)
+    let nearbyKin = [];
+    let nearbyLeaders = [];
+
+    for (const other of allDots) {
+      if (other === dot) continue;
+
+      // Check if same type
+      const otherIsBlue = other.fate === 'residue' && other.transformProgress > 0.5;
+      const otherIsSmallWhite = !other.isLarge && !otherIsBlue;
+      const otherIsLargeWhite = other.isLarge;
+
+      const sameType = (isBlue && otherIsBlue) ||
+                       (isSmallWhite && otherIsSmallWhite) ||
+                       (isLargeWhite && otherIsLargeWhite);
+
+      if (!sameType) continue;
+
+      // Check distance
+      const dx = other.x - dot.x;
+      const dy = other.y - dot.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < KINSHIP_RADIUS && dist > 5) {
+        nearbyKin.push({ other, dx, dy, dist });
+        if (other.personality === 'leader') {
+          nearbyLeaders.push({ other, dx, dy, dist });
+        }
       }
-    });
-  }
-
-  // Frame 12-13: Physics and layering
-  if (t >= ruptureStart) {
-    const ecosystemTime = t - ruptureStart;
-    const dissipationProgress = Math.min(1, ecosystemTime / TIMELINE.dissipation);
-
-    // Collect all dots for physics
-    const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
-
-    // Separate into layers
-    const foamDots = allDots.filter(d => d.fate === 'foam');
-    const residueDots = allDots.filter(d => d.fate === 'residue');
-
-    // Update each layer
-    foamDots.forEach(dot => updateFoamPhysics(dot, dissipationProgress));
-    residueDots.forEach(dot => updateResiduePhysics(dot, foamDots));
-
-    // Background: Text words emerge
-    updateFloatingWords(t, ruptureStart);
-  }
-}
-
-// Foreground: White bubbles clump into islands and drift
-function updateFoamPhysics(dot, dissipationProgress) {
-  const island = blobCenters[dot.targetIsland];
-
-  // Clumping force (pulls toward island)
-  const dx = island.x - dot.x;
-  const dy = island.y - dot.y;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-
-  if (dist > 10) {
-    dot.vx += (dx / dist) * FOAM_CLUMP_FORCE;
-    dot.vy += (dy / dist) * FOAM_CLUMP_FORCE;
-  }
-
-  // Drift force (slow off-screen movement)
-  dot.vx += dot.driftDirection.x * FOAM_DRIFT_FORCE * dissipationProgress;
-  dot.vy += dot.driftDirection.y * FOAM_DRIFT_FORCE * dissipationProgress;
-
-  // Damping
-  dot.vx *= FOAM_DAMPING;
-  dot.vy *= FOAM_DAMPING;
-
-  // Update position
-  dot.x += dot.vx;
-  dot.y += dot.vy;
-
-  // Fade out over time (dissipation)
-  if (!dot.foamOpacity) dot.foamOpacity = 1;
-  dot.foamOpacity = Math.max(0, 1 - dissipationProgress * WHITE_FADE_RATE * 10);
-}
-
-// Mid-ground: Blue dots follow bubble trails (digital dust/residue)
-function updateResiduePhysics(dot, foamDots) {
-  // Find nearest foam bubble to trail
-  let nearestFoam = null;
-  let minDist = Infinity;
-
-  for (const foam of foamDots) {
-    const dx = foam.x - dot.x;
-    const dy = foam.y - dot.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-
-    if (dist < minDist && dist < 200) {  // Only trail if within range
-      minDist = dist;
-      nearestFoam = foam;
     }
-  }
 
-  // Follow the trail of nearest foam
-  if (nearestFoam) {
-    const dx = nearestFoam.x - dot.x;
-    const dy = nearestFoam.y - dot.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    // Apply personality-based behavior
+    const personality = dot.personality || 'wanderer';
 
-    if (dist > 5) {
-      // Trail behind the foam (like digital dust)
-      dot.vx += (dx / dist) * RESIDUE_TRAIL_FORCE;
-      dot.vy += (dy / dist) * RESIDUE_TRAIL_FORCE;
+    if (personality === 'leader') {
+      // Leaders: move confidently, ignore others
+      // Just Brownian motion (no social forces)
+
+    } else if (personality === 'follower' && nearbyLeaders.length > 0) {
+      // Followers: attracted to nearest leader
+      const nearest = nearbyLeaders[0];
+      const force = FOLLOWER_ATTRACT;
+      dot.vx += (nearest.dx / nearest.dist) * force;
+      dot.vy += (nearest.dy / nearest.dist) * force;
+
+    } else if (personality === 'loner' && nearbyKin.length > CROWDING_THRESHOLD) {
+      // Loners: repelled when crowded
+      let repelX = 0, repelY = 0;
+      for (const kin of nearbyKin) {
+        repelX -= kin.dx / kin.dist;
+        repelY -= kin.dy / kin.dist;
+      }
+      const repelMag = Math.sqrt(repelX * repelX + repelY * repelY);
+      if (repelMag > 0) {
+        dot.vx += (repelX / repelMag) * LONER_REPEL;
+        dot.vy += (repelY / repelMag) * LONER_REPEL;
+      }
+
+    } else if (personality === 'wanderer') {
+      // Wanderers: ignore others, just drift
+      // Just Brownian motion
     }
-  } else {
-    // No foam nearby - gentle drift
-    dot.vx += (random() - 0.5) * 0.1;
-    dot.vy += (random() - 0.5) * 0.1;
-  }
 
-  // Higher damping (residue has more friction)
-  dot.vx *= RESIDUE_DAMPING;
-  dot.vy *= RESIDUE_DAMPING;
+    // Add random force (Brownian motion) - scaled by personality
+    const speedMult = dot.speedMultiplier || 1.0;
+    dot.vx += (random() - 0.5) * BASE_SPEED * speedMult;
+    dot.vy += (random() - 0.5) * BASE_SPEED * speedMult;
 
-  // Update position
-  dot.x += dot.vx;
-  dot.y += dot.vy;
+    // Apply damping
+    dot.vx *= FLOAT_DAMPING;
+    dot.vy *= FLOAT_DAMPING;
 
-  // Constrain to canvas
-  dot.x = constrain(dot.x, 0, BASE_W);
-  dot.y = constrain(dot.y, 0, BASE_H);
+    // Update position
+    dot.x += dot.vx;
+    dot.y += dot.vy;
+
+    // Wrap around screen edges (more freedom to roam)
+    if (dot.x < -50) dot.x = BASE_W + 50;
+    if (dot.x > BASE_W + 50) dot.x = -50;
+    if (dot.y < -50) dot.y = BASE_H + 50;
+    if (dot.y > BASE_H + 50) dot.y = -50;
+  });
+
+  // 4. Background text emerges
+  updateFloatingWords(t, p5 + TIMELINE.textEmergeStart);
 }
+
+// Phase 5 is now integrated into updatePhase5 - smooth continuous animation
 
 function updateFloatingWords(t, fadeEnd) {
   const timeSinceFade = t - fadeEnd;
@@ -1017,8 +1038,8 @@ function updateFloatingWords(t, fadeEnd) {
 }
 
 // Background: Text words emerge from grey space (static data layer)
-function updateFloatingWords(t, ruptureStart) {
-  const timeSinceRupture = t - ruptureStart;
+function updateFloatingWords(t, phase5Start) {
+  const timeSinceRupture = t - phase5Start;
   const emergeStart = WORD_EMERGE_DELAY;
   const emergeEnd = emergeStart + WORD_EMERGE_DURATION;
 
@@ -1254,44 +1275,43 @@ function drawDots(dots, globalScale = 1, maxScale = 1, showStroke = true, is2026
 
     let fillColor, strokeColor, useStroke, strokeAlpha, dotOpacity;
 
-    // Phase 5 layering system
+    // Smooth color transition: white → blue
     if (fate === 'residue' && transformProgress > 0) {
-      // Mid-ground: Blue residue dots (solid blue, small, no stroke)
-      fillColor = DOT_STYLE.stroke;  // Solid blue fill
-      strokeColor = null;
-      useStroke = false;
-      strokeAlpha = 0;
+      // Interpolate from white to blue
+      const whiteFill = DOT_STYLE.fill;
+      const blueFill = DOT_STYLE.stroke;
+
+      const r = whiteFill[0] + (blueFill[0] - whiteFill[0]) * transformProgress;
+      const g = whiteFill[1] + (blueFill[1] - whiteFill[1]) * transformProgress;
+      const b = whiteFill[2] + (blueFill[2] - whiteFill[2]) * transformProgress;
+
+      fillColor = [r, g, b];
+      strokeColor = DOT_STYLE.stroke;
+      useStroke = showStroke;
+      strokeAlpha = dot.strokeOpacity !== undefined ? dot.strokeOpacity : 1;
       dotOpacity = dot.opacity;
 
-      // Shrink dramatically (digital dust/pixel debris)
+      // Smooth size transition (shrink as they turn blue)
       const shrinkFactor = is2026 ? BLUE_DOT_SHRINK_2026 : BLUE_DOT_SHRINK_OTHER;
       const targetScale = 1 + (scale - 1) * shrinkFactor;
       scale = scale + (targetScale - scale) * transformProgress;
 
-    } else if (fate === 'foam') {
-      // Foreground: White foam bubbles (dissipating)
-      fillColor = DOT_STYLE.fill;
-      strokeColor = DOT_STYLE.stroke;
-      useStroke = showStroke;
-      strokeAlpha = 1;
-
-      // Apply foam opacity (fades during dissipation)
-      const foamOpacity = dot.foamOpacity !== undefined ? dot.foamOpacity : 1;
-      dotOpacity = dot.opacity * foamOpacity;
-
     } else {
-      // Default: White dots with blue stroke
+      // White bubbles (stay white)
       fillColor = DOT_STYLE.fill;
       strokeColor = DOT_STYLE.stroke;
       useStroke = showStroke;
-      strokeAlpha = 1;
+      strokeAlpha = dot.strokeOpacity !== undefined ? dot.strokeOpacity : 1;
       dotOpacity = dot.opacity;
     }
+
+    // Skip rendering if completely faded
+    if (dotOpacity <= 0) continue;
 
     push();
     fill(fillColor[0], fillColor[1], fillColor[2], dotOpacity * 255);
 
-    if (useStroke && strokeColor) {
+    if (useStroke && strokeColor && strokeAlpha > 0) {
       stroke(strokeColor[0], strokeColor[1], strokeColor[2], dotOpacity * 255 * strokeAlpha);
       // The Texture: Thick blue outlines for bubble effect
       const progress = maxScale > 1 ? (scale - 1) / (maxScale - 1) : 0;
