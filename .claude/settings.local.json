@@ -7,7 +7,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(node inspect-frames.mjs:*)",
+      "Bash(node analyze-frames-10-13.mjs:*)"
     ]
   }
 }

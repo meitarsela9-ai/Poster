@@ -81,14 +81,15 @@ Smooth metamorphosis with emergent behavior - the ecosystem reveals itself
 
 #### Visual Transformations (smooth, no popping):
 - **Poster fade** (89.0s): Original graphics fade out instantly
-- **Floating starts** (89.0s+): All dots begin Brownian motion with personalities
-- **Blue transformation** (97.0s - 109.0s):
-  - 70% of small dots smoothly transition white → blue (12s)
-  - Smooth color interpolation (no popping)
+- **Blue transformation** (89.0s - 89.5s): 70% of small dots instantly transform white → blue (0.5s)
+  - Happens BEFORE dispersion so dots are already colored
   - Blue dots shrink to 25% of small white size
+- **Dispersion explosion** (89.0s - 92.0s): All small dots scatter across screen (3s)
+- **Snake game starts** (92.0s+): Grid-based movement, eating, and cutting begins
 - **Stroke fade** (101.0s - 116.0s):
-  - ALL dots gradually lose blue outlines (15s)
-  - Final state: pure white and pure blue (no strokes)
+  - Small dots gradually lose blue outlines (15s)
+  - Large white dots keep their outlines permanently
+  - Final state: small dots are pure (no strokes), large dots keep strokes
 - **Text emerges** (97.0s - 105.0s): Background text layer fades in (8s)
 
 #### Three Distinct Bubble Sizes:
@@ -106,14 +107,40 @@ Each dot assigned personality at Phase 5 start (like Conway's Game of Life):
 
 **Result**: Organic trails, dynamic groupings, dots with "life" - no concentric circles
 
+#### Small Dot Snake Game:
+All small dots (both white and blue) use grid-based Markov walks with eating and cutting mechanics:
+
+- **Initial explosion/dispersion** (first 3 seconds of Phase 5):
+  - All small dots disperse across screen with fast Brownian motion (2x speed)
+  - Spreads dots out before snake game begins
+- **Who**: Small white dots (30%) + Small blue dots (70% transform from white)
+  - Blue dots smoothly transform from white during Phase 5 (not created separately)
+  - Total small dot count remains constant - blue replaces white, doesn't add to it
+- **Grid-based Markov walk**: Dots move in discrete steps on a grid (8px cells)
+- **4-directional movement**: Only up, down, left, right (like classic snake game)
+- **Random direction changes**: 15% chance to change direction each step
+- **Snake eating**: When two snake heads collide (any color), the larger eats the smaller
+  - Eaten snake becomes body segments following the eater
+  - White snakes can eat blue snakes and vice versa
+  - Snakes grow by eating other snakes
+  - **Proper chain following**: Each segment follows the one ahead (creates long snakes)
+- **Snake cutting**: When a snake head collides with another snake's body, it cuts that snake
+  - The body segment becomes a new independent snake head
+  - Creates dynamic splitting and reformation
+- **Step interval**: 0.15 seconds between moves (speed of snake movement)
+- **Large white dots**: Only large dots (from 2026) use much faster, fluid Brownian motion (1.2 speed, 0.95 damping)
+  - Always keep their blue outlines (never fade)
+  - Always rendered on top of small dots and text
+
 #### Floating Text Layer:
 Background text broken into 1-4 character chunks, randomly scattered across canvas:
 
 - **Random positioning**: Chunks placed randomly across entire screen (not at original Figma positions)
-- Text rendered **underneath bubbles** (z-index: below dots)
+- Text rendered **at bottom layer** (underneath all dots)
 - Sometimes hidden when bubbles pass over
 - Creates layered depth effect with fragmented, scattered text
-- Chunks drift independently with minimal Brownian motion
+- Chunks drift independently with fluid Brownian motion (0.8 speed, 0.96 damping)
+- **Rendering order**: Text (bottom) → Small dots (middle) → Large dots (top)
 
 ## Key Configuration
 
@@ -166,12 +193,23 @@ const BLUE_DOT_PERCENTAGE = 0.7;    // 70% of small dots turn blue
 const BLUE_DOT_SHRINK_OTHER = 0.25; // Blue dots shrink to 25% of small white
 
 // Emergent behavior
-const BASE_SPEED = 0.12;            // Base Brownian motion
+const BASE_SPEED = 0.12;            // Base Brownian motion for small dots
+const LARGE_DOT_SPEED = 1.2;        // Much faster, fluid Brownian motion for large white dots
+const FLOAT_DAMPING = 0.95;         // Less damping for more fluid movement
 const KINSHIP_RADIUS = 100;         // How far dots "feel" their kin
 const LEADER_SPEED = 1.8;           // Leaders move 1.8x faster
 const FOLLOWER_ATTRACT = 0.025;     // Followers attracted to leaders
 const LONER_REPEL = 0.04;           // Loners repelled when crowded
 const CROWDING_THRESHOLD = 8;       // Too many neighbors = crowded
+
+// Small dot snake game
+const BLUE_DISPERSION_TIME = 3.0;   // Initial explosion/dispersion duration (seconds)
+const BLUE_DISPERSION_SPEED = 2.0;  // Speed multiplier during dispersion
+const BLUE_GRID_SIZE = 8;           // Grid cell size for discrete movement
+const BLUE_STEP_INTERVAL = 0.15;    // Time between steps (seconds)
+const BLUE_DIRECTION_CHANGE = 0.15; // Probability of changing direction
+const BLUE_EATING_DISTANCE = 12;    // Distance for eating another snake
+const BLUE_CUTTING_DISTANCE = 8;    // Distance for cutting a snake
 ```
 
 ## Sampling Strategy (for performance & aesthetics)
