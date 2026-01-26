@@ -76,12 +76,13 @@ let TIMELINE = {
   phase3Start: 40.0,    // The accumulation begins
   gradualFill: 30.0,    // Slow sprinkle, like rain on pavement - even slower
 
-  // Phase 4: The Bloom - Ink expanding in water / Popcorn popping
+  // Phase 4: The Bloom - Synchronized expansion
   phase4Start: 70.0,    // The expansion: data points inflate
-  dotsGrow: 18.0,       // Slower bloom - more gradual expansion
+  dotsGrowStartDelay: 1.0,  // Wait for all dots to fully appear before growing
+  dotsGrow: 18.0,       // Synchronized bloom - all dots grow together
 
   // Phase 5: Smooth transformations (no popping)
-  phase5Start: 88.0,            // Start floating and transforming
+  phase5Start: 89.0,            // Start floating and transforming
   floatStart: 0.0,              // Brownian motion starts immediately
   blueTransformStart: 8.0,      // Small dots start turning blue (delayed more)
   blueTransformDuration: 12.0,  // Smooth color change white → blue (slower)
@@ -120,13 +121,13 @@ const RECT_POSTER_MARGIN = 20; // margin from poster edges when rectangle grows 
 
 let TANGENT_THRESHOLD = 0.15;  // how "straight" an edge must be (now dynamic)
 let TANGENT_DOT_RADIUS = 3;  // Same as fill dots (now dynamic)
-let TANGENT_SPACING = 25;  // Spacing for sampling tangent dots (now dynamic)
+let TANGENT_SPACING = 15;  // Spacing for sampling tangent dots (now dynamic)
 
-let FILL_TARGET = 0.15;  // 15% fill for 2026 (now dynamic)
-let FILL_TARGET_SMALL = 0.2;  // 20% fill for small text (now dynamic)
+let FILL_TARGET = 0.45;  // 45% fill for 2026 (now dynamic)
+let FILL_TARGET_SMALL = 0.5;  // 50% fill for small text (now dynamic)
 let FILL_DOT_RADIUS = 3;  // (now dynamic)
-let FILL_SPACING_2026 = 25;  // Spacing for 2026 fill dots (now dynamic)
-let FILL_SPACING_OTHER = 6;  // Spacing for other text fill dots (now dynamic)
+let FILL_SPACING_2026 = 15;  // Spacing for 2026 fill dots (now dynamic)
+let FILL_SPACING_OTHER = 4;  // Spacing for other text fill dots (now dynamic)
 
 // Phase 4: The Bloom - Aggressive expansion contrast
 let DOT_GROW_2026 = 13;  // 2026 dots balloon aggressively (now dynamic)
@@ -709,32 +710,31 @@ function initFloatingWords() {
 
   // Process each text node from Figma
   textData.texts.forEach((textNode, index) => {
-    // Split text into words (handle multi-line text by removing newlines first)
+    // Get clean text (handle multi-line text by removing newlines first)
     const cleanText = textNode.text.replace(/\n/g, ' ').trim();
     if (cleanText.length === 0) return;
 
-    const words = cleanText.split(/\s+/);
     const fontSize = textNode.fontSize;
     const fontWeight = textNode.fontWeight;
 
-    // Calculate approximate character width for IBM Plex Mono (monospace font)
-    // Monospace fonts have consistent character widths
-    const charWidth = fontSize * 0.6;  // IBM Plex Mono is about 0.6em wide per character
+    // Break text into 1-4 character chunks
+    let i = 0;
+    while (i < cleanText.length) {
+      // Random chunk size between 1-4 characters
+      const chunkSize = Math.floor(Math.random() * 4) + 1;
+      const chunk = cleanText.substr(i, chunkSize);
 
-    let currentX = textNode.x;
-    const currentY = textNode.y;
-
-    words.forEach((word, wordIndex) => {
-      if (word.trim().length > 0) {
-        // Calculate word width (monospace = char width * length)
-        const wordWidth = word.length * charWidth;
+      if (chunk.trim().length > 0) {
+        // Randomly position chunks across the entire canvas
+        const randomX = random(0, BASE_W);
+        const randomY = random(0, BASE_H);
 
         floatingWords.push({
-          text: word,
-          originalX: currentX,
-          originalY: currentY,
-          x: currentX,
-          y: currentY,
+          text: chunk,
+          originalX: randomX,
+          originalY: randomY,
+          x: randomX,
+          y: randomY,
           vx: 0,
           vy: 0,
           opacity: 0,
@@ -744,14 +744,13 @@ function initFloatingWords() {
           fontWeight: fontWeight,
           textNode: textNode.name
         });
-
-        // Move to next word position (add word width + space)
-        currentX += wordWidth + charWidth;
       }
-    });
+
+      i += chunkSize;
+    }
   });
 
-  console.log(`Created ${floatingWords.length} floating word particles`);
+  console.log(`Created ${floatingWords.length} floating text chunks randomly positioned (1-4 characters each)`);
 }
 
 // ===== MAIN DRAW LOOP =====
@@ -1007,10 +1006,11 @@ function updatePhase3(t) {
 
 function updatePhase4(t) {
   const p4 = TIMELINE.phase4Start;
-  const growEnd = p4 + TIMELINE.dotsGrow;
+  const growStart = p4 + TIMELINE.dotsGrowStartDelay;
+  const growEnd = growStart + TIMELINE.dotsGrow;
 
-  // Before phase 4
-  if (t < p4) {
+  // Before phase 4 or during the wait period (all dots generated, waiting to grow)
+  if (t < growStart) {
     dotScale2026 = 1;
     dotScaleOther = 1;
     // Reset all dot scales
@@ -1021,9 +1021,9 @@ function updatePhase4(t) {
     return;
   }
 
-  const overallProgress = Math.min(1, (t - p4) / TIMELINE.dotsGrow);
+  const overallProgress = Math.min(1, (t - growStart) / TIMELINE.dotsGrow);
 
-  // The Expansion: Ink expanding in water / Popcorn popping
+  // The Expansion: Synchronized bloom - all dots grow together
   // Use exponential easing for more dramatic "pop" effect
   const bloomEase = (p) => {
     // Starts slow, then explodes outward
@@ -1034,18 +1034,16 @@ function updatePhase4(t) {
 
   // The Contrast: 2026 dots balloon aggressively
   tangentDots.forEach(d => {
-    const dotProgress = Math.max(0, (overallProgress - d.growthDelay * 0.7) / 0.3);
-    // Aggressive expansion with popping easing
-    d.scale = 1 + (DOT_GROW_2026 - 1) * bloomEase(Math.min(1, dotProgress));
+    // Synchronized expansion - all dots grow together
+    d.scale = 1 + (DOT_GROW_2026 - 1) * bloomEase(overallProgress);
   });
 
   // Fill dots: 2026 huge, others smaller
   for (const elementName of Object.keys(fillDots)) {
     const targetScale = elementName === 'numbers2026' ? DOT_GROW_2026 : DOT_GROW_OTHER;
     fillDots[elementName].forEach(d => {
-      const dotProgress = Math.max(0, (overallProgress - d.growthDelay * 0.7) / 0.3);
-      // Use bloom easing for popcorn-like expansion
-      d.scale = 1 + (targetScale - 1) * bloomEase(Math.min(1, dotProgress));
+      // Synchronized expansion - all dots grow together
+      d.scale = 1 + (targetScale - 1) * bloomEase(overallProgress);
     });
   }
 
@@ -1393,7 +1391,10 @@ function renderScene(t) {
       drawCornerElements(cornerDotsOpacity, cornerHandlesOpacity, drawX, drawY, drawW, drawH);
     }
   }
-  
+
+  // Draw floating words (Phase 5) - BEFORE dots so text is underneath bubbles
+  drawFloatingWords();
+
   // Draw Phase 2 tangent dots (on 2026, so use 2026 scale, with stroke)
   drawDots(tangentDots, dotScale2026, DOT_GROW_2026, true, true);
 
@@ -1407,9 +1408,6 @@ function renderScene(t) {
       drawDots(fillDots[elementName], dotScaleOther, DOT_GROW_OTHER, showStroke, false);
     }
   }
-
-  // Draw floating words (Phase 5)
-  drawFloatingWords();
 }
 
 function drawCornerElements(dotsOpacity, handlesOpacity, x, y, w, h) {
