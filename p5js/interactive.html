@@ -117,14 +117,14 @@
     /* Scene Navigation */
     .scene-nav {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 6px;
       margin-bottom: 8px;
     }
 
     .scene-nav button {
       padding: 8px 4px;
-      font-size: 10px;
+      font-size: 9px;
     }
 
     /* Phase Sections */
@@ -289,12 +289,21 @@
         <button id="play-pause">Pause</button>
         <button id="reset">Reset</button>
       </div>
+      <div class="button-group">
+        <button id="export-settings">Export Settings</button>
+      </div>
       <div class="scene-nav">
         <button class="scene-btn" data-scene="1">Phase 1</button>
         <button class="scene-btn" data-scene="2">Phase 2</button>
         <button class="scene-btn" data-scene="3">Phase 3</button>
         <button class="scene-btn" data-scene="4">Phase 4</button>
         <button class="scene-btn" data-scene="5">Phase 5</button>
+        <button class="scene-btn" data-scene="6">Phase 6</button>
+        <button class="scene-btn" data-scene="7">Phase 7</button>
+        <button class="scene-btn" data-scene="8">Phase 8</button>
+        <button class="scene-btn" data-scene="9">Phase 9</button>
+        <button class="scene-btn" data-scene="10">Phase 10</button>
+        <button class="scene-btn" data-scene="11">Phase 11</button>
       </div>
       <div class="time-display">
         Time: <span id="current-time">0.0</span>s / Phase: <span id="current-phase">1</span>
@@ -529,27 +538,47 @@
       </div>
     </div>
 
-    <!-- Phase 5: Transformation & Emergence -->
+    <!-- Phase 5: The Dispersion -->
     <div class="phase-section">
       <div class="phase-header" data-phase="5">
-        <h2>Phase 5: Transformation</h2>
+        <h2>Phase 5: The Dispersion</h2>
         <span class="toggle">▼</span>
       </div>
       <div class="phase-content">
         <div class="control-group">
-          <label>Blue Transform Start Delay (s)</label>
+          <label>Dispersion Duration (s)</label>
           <div class="control-row">
-            <input type="range" id="blue-transform-start" min="0" max="20" step="0.5" value="8">
-            <span class="value-display" id="blue-transform-start-val">8.0</span>
+            <input type="range" id="dispersion-duration" min="0.5" max="10" step="0.5" value="3.0">
+            <span class="value-display" id="dispersion-duration-val">3.0</span>
           </div>
+          <div class="info">How long the initial explosion lasts</div>
         </div>
 
         <div class="control-group">
+          <label>Dispersion Speed Multiplier</label>
+          <div class="control-row">
+            <input type="range" id="dispersion-speed" min="1" max="50" step="1" value="20">
+            <span class="value-display" id="dispersion-speed-val">20x</span>
+          </div>
+          <div class="info">Speed multiplier during explosion</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 6: The Transformation -->
+    <div class="phase-section">
+      <div class="phase-header" data-phase="6">
+        <h2>Phase 6: The Transformation</h2>
+        <span class="toggle">▼</span>
+      </div>
+      <div class="phase-content">
+        <div class="control-group">
           <label>Blue Transform Duration (s)</label>
           <div class="control-row">
-            <input type="range" id="blue-transform-duration" min="2" max="30" step="1" value="12">
-            <span class="value-display" id="blue-transform-duration-val">12</span>
+            <input type="range" id="blue-transform-duration" min="0.1" max="5" step="0.1" value="0.5">
+            <span class="value-display" id="blue-transform-duration-val">0.5</span>
           </div>
+          <div class="info">How long transformation takes</div>
         </div>
 
         <div class="control-group">
@@ -569,23 +598,23 @@
           </div>
           <div class="info">How much blue dots shrink (1 = no shrink)</div>
         </div>
+      </div>
+    </div>
 
+    <!-- Phase 7: The Float -->
+    <div class="phase-section">
+      <div class="phase-header" data-phase="7">
+        <h2>Phase 7: The Float</h2>
+        <span class="toggle">▼</span>
+      </div>
+      <div class="phase-content">
         <div class="control-group">
-          <label>Float Speed</label>
+          <label>Base Float Speed (small dots)</label>
           <div class="control-row">
             <input type="range" id="base-speed" min="0.01" max="0.5" step="0.01" value="0.12">
             <span class="value-display" id="base-speed-val">0.12</span>
           </div>
-          <div class="info">Brownian motion strength</div>
-        </div>
-
-        <div class="control-group">
-          <label>Float Damping</label>
-          <div class="control-row">
-            <input type="range" id="float-damping" min="0.90" max="0.99" step="0.01" value="0.97">
-            <span class="value-display" id="float-damping-val">0.97</span>
-          </div>
-          <div class="info">Velocity decay (higher = smoother)</div>
+          <div class="info">Brownian motion strength for small dots</div>
         </div>
 
         <div class="control-group">
@@ -595,6 +624,15 @@
             <span class="value-display" id="large-dot-speed-val">0.15</span>
           </div>
           <div class="info">Brownian motion speed for large dots</div>
+        </div>
+
+        <div class="control-group">
+          <label>Float Damping</label>
+          <div class="control-row">
+            <input type="range" id="float-damping" min="0.90" max="0.99" step="0.01" value="0.97">
+            <span class="value-display" id="float-damping-val">0.97</span>
+          </div>
+          <div class="info">Velocity decay (higher = smoother)</div>
         </div>
 
         <div class="control-group">
@@ -650,26 +688,115 @@
           </div>
           <div class="info">Fastest dots drift at this speed</div>
         </div>
+      </div>
+    </div>
 
-        <div class="control-group">
-          <button id="regenerate-phase5" style="width: 100%;">Regenerate Phase 5 Speed Variation</button>
-          <div class="info">Click to reassign random speed variations</div>
-        </div>
-
-        <div class="control-group">
-          <label>Text Emerge Start Delay (s)</label>
-          <div class="control-row">
-            <input type="range" id="text-emerge-start" min="0" max="20" step="0.5" value="8">
-            <span class="value-display" id="text-emerge-start-val">8.0</span>
-          </div>
-        </div>
-
+    <!-- Phase 8: The Resurfacing -->
+    <div class="phase-section">
+      <div class="phase-header" data-phase="8">
+        <h2>Phase 8: The Resurfacing</h2>
+        <span class="toggle">▼</span>
+      </div>
+      <div class="phase-content">
         <div class="control-group">
           <label>Text Emerge Duration (s)</label>
           <div class="control-row">
             <input type="range" id="text-emerge-duration" min="2" max="20" step="0.5" value="8">
             <span class="value-display" id="text-emerge-duration-val">8.0</span>
           </div>
+          <div class="info">How long text takes to fade in</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 9: The Fade -->
+    <div class="phase-section">
+      <div class="phase-header" data-phase="9">
+        <h2>Phase 9: The Fade</h2>
+        <span class="toggle">▼</span>
+      </div>
+      <div class="phase-content">
+        <div class="control-group">
+          <label>Stroke Fade Duration (s)</label>
+          <div class="control-row">
+            <input type="range" id="stroke-fade-duration" min="5" max="30" step="1" value="15">
+            <span class="value-display" id="stroke-fade-duration-val">15</span>
+          </div>
+          <div class="info">How long strokes take to disappear</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 10: The Snake Game -->
+    <div class="phase-section">
+      <div class="phase-header" data-phase="10">
+        <h2>Phase 10: The Snake Game</h2>
+        <span class="toggle">▼</span>
+      </div>
+      <div class="phase-content">
+        <div class="control-group">
+          <label>Grid Size (px)</label>
+          <div class="control-row">
+            <input type="range" id="snake-grid-size" min="2" max="20" step="1" value="8">
+            <span class="value-display" id="snake-grid-size-val">8</span>
+          </div>
+          <div class="info">Grid cell size for snake movement</div>
+        </div>
+
+        <div class="control-group">
+          <label>Step Interval (s)</label>
+          <div class="control-row">
+            <input type="range" id="snake-step-interval" min="0.05" max="0.5" step="0.05" value="0.15">
+            <span class="value-display" id="snake-step-interval-val">0.15</span>
+          </div>
+          <div class="info">Time between snake steps</div>
+        </div>
+
+        <div class="control-group">
+          <label>Direction Change Probability</label>
+          <div class="control-row">
+            <input type="range" id="snake-direction-change" min="0" max="1" step="0.05" value="0.15">
+            <span class="value-display" id="snake-direction-change-val">15%</span>
+          </div>
+          <div class="info">Chance to change direction each step</div>
+        </div>
+
+        <div class="control-group">
+          <label>Eating Distance (px)</label>
+          <div class="control-row">
+            <input type="range" id="snake-eating-distance" min="5" max="30" step="1" value="12">
+            <span class="value-display" id="snake-eating-distance-val">12</span>
+          </div>
+          <div class="info">Distance for snake eating</div>
+        </div>
+
+        <div class="control-group">
+          <label>Cutting Distance (px)</label>
+          <div class="control-row">
+            <input type="range" id="snake-cutting-distance" min="3" max="20" step="1" value="8">
+            <span class="value-display" id="snake-cutting-distance-val">8</span>
+          </div>
+          <div class="info">Distance for snake cutting</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 11: The Ecosystem -->
+    <div class="phase-section">
+      <div class="phase-header" data-phase="11">
+        <h2>Phase 11: The Ecosystem</h2>
+        <span class="toggle">▼</span>
+      </div>
+      <div class="phase-content">
+        <div class="info" style="padding: 10px 0; text-align: center;">
+          Final stable state - all systems running in harmony.
+          <br><br>
+          No additional controls for this phase.
+        </div>
+
+        <div class="control-group">
+          <button id="regenerate-phase5" style="width: 100%;">Regenerate All Dot Properties</button>
+          <div class="info">Click to reassign random speed variations and personalities</div>
         </div>
       </div>
     </div>
@@ -738,10 +865,15 @@
       setupControl('stroke-grow-max', 'x');
 
       // Phase 5
-      setupControl('blue-transform-start');
+      setupControl('dispersion-duration');
+      setupControl('dispersion-speed', 'x');
+
+      // Phase 6
       setupControl('blue-transform-duration');
       setupControl('blue-dot-percentage', '%');
       setupControl('blue-dot-shrink');
+
+      // Phase 7
       setupControl('base-speed');
       setupControl('float-damping');
       setupControl('large-dot-speed');
@@ -751,8 +883,19 @@
       setupControl('gust-frequency', '%');
       setupControl('speed-var-min');
       setupControl('speed-var-max');
-      setupControl('text-emerge-start');
+
+      // Phase 8
       setupControl('text-emerge-duration');
+
+      // Phase 9
+      setupControl('stroke-fade-duration');
+
+      // Phase 10
+      setupControl('snake-grid-size');
+      setupControl('snake-step-interval');
+      setupControl('snake-direction-change', '%');
+      setupControl('snake-eating-distance');
+      setupControl('snake-cutting-distance');
     });
   </script>
 </body>

@@ -1,7 +1,15 @@
-// ===== POSTER ANIMATION - THREE PHASE SYSTEM =====
-// Phase 1: Rectangle around Times/Language - grows, text scales, reverses, disappears
-// Phase 2: Tangent dots appear on 2026 (points with straight edges)
-// Phase 3: Gradual fill to 60% on all elements
+// ===== POSTER ANIMATION - 11 PHASE SYSTEM =====
+// Phase 1: The Breath - Rectangle breathing animation around Times/Language
+// Phase 2: The Constellation - Tangent dots twinkle on 2026
+// Phase 3: The Infusion - Gradual fill dots sprinkle onto all elements
+// Phase 4: The Bloom - Synchronized dot expansion
+// Phase 5: The Dispersion - Initial explosion scatters dots
+// Phase 6: The Transformation - Small dots turn blue
+// Phase 7: The Float - Large dots drift with Brownian motion + attraction
+// Phase 8: The Resurfacing - Background text emerges
+// Phase 9: The Fade - Strokes disappear from small dots
+// Phase 10: The Snake Game - Small dots follow grid-based movement
+// Phase 11: The Ecosystem - Final stable state
 
 const BASE_W = 1080;
 const BASE_H = 1350;
@@ -52,18 +60,32 @@ const TIMELINE = {
   dotsGrowStartDelay: 1.0,  // Wait for all dots to fully appear before growing
   dotsGrow: 18.0,       // Synchronized bloom - all dots grow together
 
-  // Phase 5: Smooth transformations (no popping)
-  phase5Start: 89.0,            // Start floating and transforming
-  floatStart: 0.0,              // Brownian motion starts immediately
-  blueTransformStart: 0.0,      // Small dots turn blue immediately (at Phase 5 start)
-  blueTransformDuration: 0.5,   // Nearly instant transformation (before dispersion explosion)
-  strokeFadeStart: 12.0,        // Strokes start fading (delayed more)
-  strokeFadeDuration: 15.0,     // Gradual stroke removal (slower)
-  textEmergeStart: 8.0,         // Text emerges
-  textEmergeDuration: 8.0,      // Text fade duration (slower)
+  // Phase 5: The Dispersion - Initial explosion
+  phase5Start: 89.0,            // Dispersion begins
+  dispersionDuration: 3.0,      // Fast Brownian explosion to scatter dots
 
-  // End
-  holdFinal: 20.0               // Ecosystem stabilizes (longer)
+  // Phase 6: The Transformation - Color shift
+  phase6Start: 89.0,            // Blue transformation (overlaps with Phase 5)
+  blueTransformDuration: 0.5,   // Nearly instant transformation to blue
+
+  // Phase 7: The Float - Brownian motion ecosystem
+  phase7Start: 92.0,            // Floating behavior begins (after dispersion)
+  // Ongoing: Large dots use attraction points, small dots use snake game
+
+  // Phase 8: The Resurfacing - Text emerges from grey space
+  phase8Start: 97.0,            // Text starts emerging
+  textEmergeDuration: 8.0,      // Text fade-in duration
+
+  // Phase 9: The Fade - Strokes disappear
+  phase9Start: 101.0,           // Strokes start fading
+  strokeFadeDuration: 15.0,     // Gradual stroke removal
+
+  // Phase 10: The Snake Game - Grid-based movement
+  phase10Start: 92.0,           // Snake mechanics active (after dispersion)
+  // Ongoing: Small dots follow grid-based Markov walk with eating/cutting
+
+  // Phase 11: The Ecosystem - Final stable state
+  phase11Start: 116.0           // Ecosystem fully stabilized
 };
 
 // ===== DOT SETTINGS =====
@@ -92,13 +114,13 @@ const DOT_GROW_2026 = 13;  // 2026 dots balloon aggressively (huge overlapping c
 const DOT_GROW_OTHER = 5;  // Other dots grow but stay smaller
 const STROKE_GROW_MAX = 3.5;  // Thick blue outlines at peak (bubble texture)
 
-// The Rupture: Separation of scales
+// Phase 6: The Transformation - Separation of scales
 const BLUE_DOT_PERCENTAGE = 0.7;  // 70% become blue dots (more blue dots)
 const BLUE_DOT_SHRINK_2026 = 0.25;  // Not used (2026 dots stay white)
 const BLUE_DOT_SHRINK_OTHER = 0.25;  // Blue dots shrink to 25% of small white size (even smaller)
 const WHITE_FADE_RATE = 0.015;  // White bubbles slowly fade/dissipate
 
-// Phase 5: Organic floating with attraction points
+// Phase 7: Organic floating with attraction points
 const BASE_SPEED = 0.12;              // Base Brownian motion for small dots
 const LARGE_DOT_SPEED = 0.15;         // Slower Brownian motion for large white dots (reduced for gentler movement)
 const FLOAT_DAMPING = 0.97;           // Medium damping for natural deceleration
@@ -120,16 +142,18 @@ const GUST_FREQUENCY = 0.4;           // 40% chance per frame of a gust (very fr
 const SPEED_VARIATION_MIN = 0.7;      // Some dots drift slower
 const SPEED_VARIATION_MAX = 1.3;      // Some dots drift faster
 
-// Blue dot snake behavior - Grid-based Markov walk with eating/cutting
+// Phase 5: Dispersion explosion
 const BLUE_DISPERSION_TIME = 3.0;     // Initial explosion/dispersion time (seconds) before snake game starts
 const BLUE_DISPERSION_SPEED = 20.0;   // Speed multiplier during dispersion (very fast explosion)
+
+// Phase 10: Snake game - Grid-based Markov walk with eating/cutting
 const BLUE_GRID_SIZE = 8;             // Grid cell size for discrete movement
 const BLUE_STEP_INTERVAL = 0.15;      // Time between steps (seconds) - how fast snakes move
 const BLUE_DIRECTION_CHANGE = 0.15;   // Probability of changing direction each step
 const BLUE_EATING_DISTANCE = 12;      // Distance within which dots can eat each other
 const BLUE_CUTTING_DISTANCE = 8;      // Distance for snake cutting collision
 
-// Phase 5: Background Data Layer (floating words)
+// Phase 8: Background Data Layer (floating words)
 const WORD_EMERGE_DELAY = 3.0;  // Words emerge after rupture begins
 const WORD_EMERGE_DURATION = 4.0;  // Slow emergence from grey space
 const WORD_DRIFT = 0.8;  // Much faster, more fluid drift
@@ -181,11 +205,11 @@ let fillDots = {
 let dotScale2026 = 1;  // Scale for 2026 dots
 let dotScaleOther = 1;  // Scale for other dots
 
-// Phase 5: Brownian motion and poster opacity
+// Phases 5-11: Advanced behaviors
 let posterOpacity = 1;  // Opacity of original poster elements
 let blobCenters = [];  // Positions of the 5 blobs for 2026 dots
 
-// Phase 5: Floating words
+// Phase 8: Floating words
 let floatingWords = [];  // Array of word particles that float with Brownian motion
 
 // All edge points (100%) for sampling
@@ -231,7 +255,7 @@ function setup() {
   initPhase1();
   initPhase2();
   initPhase3();
-  initPhase5();
+  initPhases5to11();
 
   systemReady = true;
   console.log("✅ Animation system ready");
@@ -455,10 +479,10 @@ function sampleEdges(edges, spacing) {
   return sampled;
 }
 
-// ===== PHASE 5: BROWNIAN MOTION INITIALIZATION =====
+// ===== PHASES 5-11: DISPERSION, TRANSFORMATION, FLOAT, TEXT, FADE, SNAKE, ECOSYSTEM =====
 
-function initPhase5() {
-  console.log("Initializing Phase 5: The Rupture & Resurfacing");
+function initPhases5to11() {
+  console.log("Initializing Phases 5-11: Dispersion → Transformation → Float → Resurfacing → Fade → Snake → Ecosystem");
 
   // Assign dots their layer roles and personalities
   // Large bubbles (2026) ALWAYS stay white - never transform to blue
@@ -512,10 +536,10 @@ function initPhase5() {
   initFloatingWords();
 
   console.log(`  Fate assignment complete:`);
-  console.log(`    - Large white bubbles (2026): Brownian motion`);
-  console.log(`    - Small white snakes: 30% stay white (grid-based snake game)`);
-  console.log(`    - Small blue snakes: 70% transform from white to blue (grid-based snake game)`);
-  console.log(`    - Background text: ${floatingWords.length} words`);
+  console.log(`    - Phase 5-7: Large white bubbles (2026) -> Dispersion + Brownian motion`);
+  console.log(`    - Phase 6: Small dots -> 70% transform to blue`);
+  console.log(`    - Phase 10: Small dots -> Grid-based snake game (white + blue)`);
+  console.log(`    - Phase 8: Background text -> ${floatingWords.length} words`);
 }
 
 // Assign random speed variation to each dot (organic individual differences)
@@ -592,7 +616,13 @@ function draw() {
   updatePhase2(t);
   updatePhase3(t);
   updatePhase4(t);
-  updatePhase5(t);
+  updatePhase5(t);  // Dispersion
+  updatePhase6(t);  // Transformation
+  updatePhase7(t);  // Float
+  updatePhase8(t);  // Resurfacing
+  updatePhase9(t);  // Fade
+  updatePhase10(t); // Snake
+  updatePhase11(t); // Ecosystem
 
   // Render
   renderScene(t);
@@ -854,7 +884,7 @@ function updatePhase4(t) {
   dotScaleOther = 1 + (DOT_GROW_OTHER - 1) * overallProgress;
 }
 
-// ===== PHASE 5 UPDATE: SMOOTH TRANSFORMATIONS =====
+// ===== PHASE 5 UPDATE: THE DISPERSION =====
 
 function updatePhase5(t) {
   const p5 = TIMELINE.phase5Start;
@@ -865,149 +895,25 @@ function updatePhase5(t) {
     return;
   }
 
-  // Poster fades out
+  // Poster fades out immediately at Phase 5 start
   posterOpacity = 0;
 
   const timeSinceP5 = t - p5;
   const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
+  const inDispersion = timeSinceP5 < TIMELINE.dispersionDuration;
 
-  // Calculate progress for each transformation
-  const blueStart = TIMELINE.blueTransformStart;
-  const blueEnd = blueStart + TIMELINE.blueTransformDuration;
-  const strokeStart = TIMELINE.strokeFadeStart;
-  const strokeEnd = strokeStart + TIMELINE.strokeFadeDuration;
+  // Dispersion explosion: All dots scatter with fast Brownian motion
+  if (inDispersion) {
+    allDots.forEach(dot => {
+      // Initialize velocity if needed
+      if (dot.vx === undefined) dot.vx = 0;
+      if (dot.vy === undefined) dot.vy = 0;
 
-  // 1. SMOOTH COLOR TRANSFORMATION (white → blue for small dots)
-  allDots.forEach(dot => {
-    if (dot.fate === 'residue' && !dot.isLarge) {
-      // Small dots transforming to blue
-      if (timeSinceP5 < blueStart) {
-        dot.transformProgress = 0;  // Still white
-      } else if (timeSinceP5 < blueEnd) {
-        // Smooth transition with individual delays
-        const progress = (timeSinceP5 - blueStart) / TIMELINE.blueTransformDuration;
-        const dotProgress = Math.max(0, (progress - dot.transformDelay * 0.7) / 0.3);
-        dot.transformProgress = easeInOutCubic(Math.min(1, dotProgress));
-      } else {
-        dot.transformProgress = 1;  // Fully blue
-      }
-    } else {
-      // Large dots and small white dots stay white
-      dot.transformProgress = 0;
-    }
-  });
-
-  // 2. SMOOTH STROKE FADE (small dots lose their outlines, large dots keep theirs)
-  allDots.forEach(dot => {
-    if (dot.isLarge) {
-      // Large dots always keep their strokes
-      dot.strokeOpacity = 1;
-    } else {
-      // Small dots gradually lose strokes
-      if (timeSinceP5 < strokeStart) {
-        dot.strokeOpacity = 1;  // Strokes visible
-      } else if (timeSinceP5 < strokeEnd) {
-        // Smooth fade
-        const progress = (timeSinceP5 - strokeStart) / TIMELINE.strokeFadeDuration;
-        dot.strokeOpacity = 1 - easeOutCubic(progress);
-      } else {
-        dot.strokeOpacity = 0;  // No strokes
-      }
-    }
-  });
-
-  // 3. EMERGENT BEHAVIOR - personality-based interactions
-  allDots.forEach(dot => {
-    // Initialize velocity if needed
-    if (dot.vx === undefined) dot.vx = 0;
-    if (dot.vy === undefined) dot.vy = 0;
-
-    // Determine dot type for kinship
-    const isBlue = dot.fate === 'residue' && dot.transformProgress > 0.5;
-    const isSmallWhite = !dot.isLarge && !isBlue;
-    const isLargeWhite = dot.isLarge;
-
-    // Check if we're in the initial dispersion phase
-    const inDispersion = timeSinceP5 < BLUE_DISPERSION_TIME;
-
-    // LARGE DOTS:
-    if (dot.isLarge) {
-      dot.vx = dot.vx || 0;
-      dot.vy = dot.vy || 0;
-
-      if (inDispersion) {
-        // DISPERSION PHASE: All large dots scatter with fast Brownian motion
-        const speedMult = (dot.speedMultiplier || 1.0) * BLUE_DISPERSION_SPEED;
-        dot.vx += (random() - 0.5) * LARGE_DOT_SPEED * speedMult;
-        dot.vy += (random() - 0.5) * LARGE_DOT_SPEED * speedMult;
-
-        // Apply damping
-        dot.vx *= FLOAT_DAMPING;
-        dot.vy *= FLOAT_DAMPING;
-
-        // Update position
-        dot.x += dot.vx;
-        dot.y += dot.vy;
-
-        // Wrap around screen edges
-        if (dot.x < 0) dot.x = BASE_W;
-        if (dot.x > BASE_W) dot.x = 0;
-        if (dot.y < 0) dot.y = BASE_H;
-        if (dot.y > BASE_H) dot.y = 0;
-      } else {
-        // AFTER DISPERSION: Brownian motion with attraction points
-        // Find nearest attraction point
-        let nearestPoint = ATTRACTION_POINTS[0];
-        let minDist = dist(dot.x, dot.y, nearestPoint.x, nearestPoint.y);
-        for (const point of ATTRACTION_POINTS) {
-          const d = dist(dot.x, dot.y, point.x, point.y);
-          if (d < minDist) {
-            minDist = d;
-            nearestPoint = point;
-          }
-        }
-
-        // Calculate minimum allowed distance (half the dot's visual radius)
-        const dotVisualRadius = dot.r * dot.scale;
-        const minAllowedDist = dotVisualRadius * MIN_DISTANCE_FROM_POINT;
-
-        // Apply gentle attraction toward nearest point (only if not too close)
-        if (minDist > minAllowedDist) {
-          const dx = nearestPoint.x - dot.x;
-          const dy = nearestPoint.y - dot.y;
-          const angle = Math.atan2(dy, dx);
-          dot.vx += cos(angle) * ATTRACTION_STRENGTH;
-          dot.vy += sin(angle) * ATTRACTION_STRENGTH;
-        }
-
-        // Brownian motion (random jittery movement)
-        const speedMult = dot.speedMultiplier || 1.0;
-        dot.vx += (random() - 0.5) * LARGE_DOT_SPEED * speedMult;
-        dot.vy += (random() - 0.5) * LARGE_DOT_SPEED * speedMult;
-
-        // Occasional strong gusts to blow dots away from attraction points
-        if (random() < GUST_FREQUENCY && minDist < minAllowedDist * 3) {
-          // Blow away from the point
-          const dx = dot.x - nearestPoint.x;
-          const dy = dot.y - nearestPoint.y;
-          const angle = Math.atan2(dy, dx);
-          dot.vx += cos(angle) * GUST_STRENGTH;
-          dot.vy += sin(angle) * GUST_STRENGTH;
-        }
-      }
-    }
-
-    // SMALL DOT SNAKE GAME: Grid-based Markov walk with eating/cutting
-    // Both small white and small blue dots use snake mechanics
-    const isSmallDot = !dot.isLarge; // Small dots (white or blue)
-
-    if (isSmallDot && inDispersion) {
-      // During dispersion: all small dots use fast Brownian motion to spread out
+      // Fast Brownian explosion
+      const speed = dot.isLarge ? LARGE_DOT_SPEED : BASE_SPEED;
       const speedMult = (dot.speedMultiplier || 1.0) * BLUE_DISPERSION_SPEED;
-      dot.vx = dot.vx || 0;
-      dot.vy = dot.vy || 0;
-      dot.vx += (random() - 0.5) * BASE_SPEED * speedMult;
-      dot.vy += (random() - 0.5) * BASE_SPEED * speedMult;
+      dot.vx += (random() - 0.5) * speed * speedMult;
+      dot.vy += (random() - 0.5) * speed * speedMult;
 
       // Apply damping
       dot.vx *= FLOAT_DAMPING;
@@ -1022,217 +928,134 @@ function updatePhase5(t) {
       if (dot.x > BASE_W) dot.x = 0;
       if (dot.y < 0) dot.y = BASE_H;
       if (dot.y > BASE_H) dot.y = 0;
-
-    } else if (isSmallDot && dot.snakeHead) {
-      // After dispersion: snake game begins
-      // Only snake heads move independently - body segments will follow
-
-      // Update step timer
-      dot.snakeStepTimer -= 1/60; // Approximate frame time
-
-      if (dot.snakeStepTimer <= 0) {
-        // Time to take a step
-        dot.snakeStepTimer = BLUE_STEP_INTERVAL;
-
-        // Markov chain: randomly change direction
-        if (Math.random() < BLUE_DIRECTION_CHANGE) {
-          dot.snakeDirection = Math.floor(Math.random() * 4);
-        }
-
-        // Store previous position for followers
-        dot.prevX = dot.x;
-        dot.prevY = dot.y;
-
-        // Move in grid-based direction (0=right, 1=down, 2=left, 3=up)
-        if (dot.snakeDirection === 0) dot.x += BLUE_GRID_SIZE;       // Right
-        else if (dot.snakeDirection === 1) dot.y += BLUE_GRID_SIZE;  // Down
-        else if (dot.snakeDirection === 2) dot.x -= BLUE_GRID_SIZE;  // Left
-        else if (dot.snakeDirection === 3) dot.y -= BLUE_GRID_SIZE;  // Up
-
-        // Wrap around screen edges
-        if (dot.x < 0) dot.x = BASE_W;
-        if (dot.x > BASE_W) dot.x = 0;
-        if (dot.y < 0) dot.y = BASE_H;
-        if (dot.y > BASE_H) dot.y = 0;
-
-        // Update followers chain: each segment moves to the position of the segment ahead
-        if (dot.snakeFollowers && dot.snakeFollowers.length > 0) {
-          // Start with the head's first follower
-          let current = dot.snakeFollowers[0];
-          let prevDot = dot;
-
-          while (current) {
-            // Store current position before moving
-            current.prevX = current.x;
-            current.prevY = current.y;
-
-            // Move to the previous dot's old position
-            current.x = prevDot.prevX;
-            current.y = prevDot.prevY;
-
-            // Move to next in chain
-            prevDot = current;
-            const currentIndex = dot.snakeFollowers.indexOf(current);
-            current = dot.snakeFollowers[currentIndex + 1];
-          }
-        }
-      }
-
-      // Check for eating and cutting with other small dots
-      for (const other of allDots) {
-        if (other === dot) continue;
-
-        // Only interact with other small dots (both white and blue)
-        const otherIsSmallDot = !other.isLarge;
-        if (!otherIsSmallDot) continue;
-
-        const dx = other.x - dot.x;
-        const dy = other.y - dot.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        // EATING: Two heads collide
-        if (dist < BLUE_EATING_DISTANCE && dot.snakeHead && other.snakeHead) {
-          // Larger snake eats smaller (or random if same size)
-          const myLength = dot.snakeLength || 1;
-          const otherLength = other.snakeLength || 1;
-
-          if (myLength >= otherLength) {
-            // I eat the other
-            other.snakeHead = false;
-            other.snakeFollowing = dot;
-            dot.snakeFollowers = dot.snakeFollowers || [];
-            dot.snakeFollowers.push(other);
-
-            // Add other's followers to me
-            if (other.snakeFollowers && other.snakeFollowers.length > 0) {
-              dot.snakeFollowers = dot.snakeFollowers.concat(other.snakeFollowers);
-              other.snakeFollowers.forEach(f => f.snakeFollowing = dot);
-            }
-
-            dot.snakeLength = dot.snakeFollowers.length + 1;
-            other.snakeFollowers = [];
-            other.snakeLength = 1;
-          }
-        }
-
-        // CUTTING: My head collides with other's body
-        if (dist < BLUE_CUTTING_DISTANCE && dot.snakeHead && !other.snakeHead) {
-          // Cut the other snake at this segment
-          if (other.snakeFollowing) {
-            const head = other.snakeFollowing;
-
-            // Remove this segment from head's followers
-            const index = head.snakeFollowers.indexOf(other);
-            if (index > -1) {
-              head.snakeFollowers.splice(index, 1);
-              head.snakeLength = head.snakeFollowers.length + 1;
-            }
-
-            // This segment becomes a new head
-            other.snakeHead = true;
-            other.snakeFollowing = null;
-            other.snakeDirection = Math.floor(Math.random() * 4);
-          }
-        }
-      }
-
-    } else if (isSmallDot && !dot.snakeHead) {
-      // Small dot body segments don't move independently - they're moved by their head
-      // Just ensure velocity is zero
-      dot.vx = 0;
-      dot.vy = 0;
-    }
-
-    // LARGE WHITE DOTS: Apply velocity and update position (for non-dispersion phases)
-    if (dot.isLarge && !inDispersion) {
-      // Apply damping
-      dot.vx *= FLOAT_DAMPING;
-      dot.vy *= FLOAT_DAMPING;
-
-      // Update position
-      dot.x += dot.vx;
-      dot.y += dot.vy;
-
-      // Wrap around screen edges (more freedom to roam)
-      if (dot.x < -50) dot.x = BASE_W + 50;
-      if (dot.x > BASE_W + 50) dot.x = -50;
-      if (dot.y < -50) dot.y = BASE_H + 50;
-      if (dot.y > BASE_H + 50) dot.y = -50;
-    }
-  });
-
-  // 4. Background text emerges
-  updateFloatingWords(t, p5 + TIMELINE.textEmergeStart);
+    });
+  }
 }
 
-// Phase 5 is now integrated into updatePhase5 - smooth continuous animation
+// ===== PHASE 6 UPDATE: THE TRANSFORMATION =====
 
-function updateFloatingWords(t, fadeEnd) {
-  const timeSinceFade = t - fadeEnd;
+function updatePhase6(t) {
+  const p6 = TIMELINE.phase6Start;
 
-  // Phase 1: Words fade in at original positions (0-1s)
-  // Phase 2: Words start breaking apart (1-3s)
-  // Phase 3: Words float freely (3s+)
+  if (t < p6) return;
 
-  floatingWords.forEach(word => {
-    // Fade in with individual delays (synchronized with posterOpacity fade)
-    const fadeInProgress = Math.min(1, timeSinceFade / WORD_BREAK_DELAY);
-    const wordFadeProgress = Math.max(0, (fadeInProgress - word.fadeDelay * 0.7) / 0.3);
-    word.opacity = easeOutCubic(Math.min(1, wordFadeProgress));
+  const timeSinceP6 = t - p6;
+  const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
 
-    // Breaking apart phase
-    if (timeSinceFade > WORD_BREAK_DELAY) {
-      const breakTimeSince = timeSinceFade - WORD_BREAK_DELAY;
-      const breakProgress = Math.min(1, breakTimeSince / WORD_BREAK_DURATION);
-      const wordBreakProgress = Math.max(0, (breakProgress - word.breakDelay * 0.7) / 0.3);
-
-      if (wordBreakProgress > 0) {
-        // Apply Brownian motion
-        word.vx += (random() - 0.5) * WORD_DRIFT;
-        word.vy += (random() - 0.5) * WORD_DRIFT;
-
-        // Apply damping
-        word.vx *= WORD_DAMPING;
-        word.vy *= WORD_DAMPING;
-
-        // Update position
-        word.x += word.vx;
-        word.y += word.vy;
-
-        // Bounce off edges
-        if (word.x < 0 || word.x > BASE_W) {
-          word.vx *= -0.8;
-          word.x = constrain(word.x, 0, BASE_W);
-        }
-        if (word.y < 0 || word.y > BASE_H) {
-          word.vy *= -0.8;
-          word.y = constrain(word.y, 0, BASE_H);
-        }
+  // Smooth color transformation: white → blue for small dots
+  allDots.forEach(dot => {
+    if (dot.fate === 'residue' && !dot.isLarge) {
+      // Small dots transforming to blue
+      if (timeSinceP6 < TIMELINE.blueTransformDuration) {
+        // Smooth transition with individual delays
+        const progress = timeSinceP6 / TIMELINE.blueTransformDuration;
+        const dotProgress = Math.max(0, (progress - dot.transformDelay * 0.7) / 0.3);
+        dot.transformProgress = easeInOutCubic(Math.min(1, dotProgress));
+      } else {
+        dot.transformProgress = 1;  // Fully blue
       }
+    } else {
+      // Large dots and small white dots stay white
+      dot.transformProgress = 0;
     }
   });
 }
 
-// Background: Text words emerge from grey space (static data layer)
-function updateFloatingWords(t, phase5Start) {
-  const timeSinceRupture = t - phase5Start;
-  const emergeStart = WORD_EMERGE_DELAY;
-  const emergeEnd = emergeStart + WORD_EMERGE_DURATION;
+// ===== PHASE 7 UPDATE: THE FLOAT =====
 
+function updatePhase7(t) {
+  const p7 = TIMELINE.phase7Start;
+
+  if (t < p7) return;
+
+  const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
+
+  // Floating behavior for large dots (Brownian motion + attraction points)
+  allDots.forEach(dot => {
+    if (!dot.isLarge) return;
+
+    // Initialize velocity if needed
+    if (dot.vx === undefined) dot.vx = 0;
+    if (dot.vy === undefined) dot.vy = 0;
+
+    // Find nearest attraction point
+    let nearestPoint = ATTRACTION_POINTS[0];
+    let minDist = dist(dot.x, dot.y, nearestPoint.x, nearestPoint.y);
+    for (const point of ATTRACTION_POINTS) {
+      const d = dist(dot.x, dot.y, point.x, point.y);
+      if (d < minDist) {
+        minDist = d;
+        nearestPoint = point;
+      }
+    }
+
+    // Calculate minimum allowed distance
+    const dotVisualRadius = dot.r * dot.scale;
+    const minAllowedDist = dotVisualRadius * MIN_DISTANCE_FROM_POINT;
+
+    // Apply gentle attraction toward nearest point (only if not too close)
+    if (minDist > minAllowedDist) {
+      const dx = nearestPoint.x - dot.x;
+      const dy = nearestPoint.y - dot.y;
+      const angle = Math.atan2(dy, dx);
+      dot.vx += cos(angle) * ATTRACTION_STRENGTH;
+      dot.vy += sin(angle) * ATTRACTION_STRENGTH;
+    }
+
+    // Brownian motion (random jittery movement)
+    const speedMult = dot.speedMultiplier || 1.0;
+    dot.vx += (random() - 0.5) * LARGE_DOT_SPEED * speedMult;
+    dot.vy += (random() - 0.5) * LARGE_DOT_SPEED * speedMult;
+
+    // Occasional strong gusts to blow dots away from attraction points
+    if (random() < GUST_FREQUENCY && minDist < minAllowedDist * 3) {
+      const dx = dot.x - nearestPoint.x;
+      const dy = dot.y - nearestPoint.y;
+      const angle = Math.atan2(dy, dx);
+      dot.vx += cos(angle) * GUST_STRENGTH;
+      dot.vy += sin(angle) * GUST_STRENGTH;
+    }
+
+    // Apply damping
+    dot.vx *= FLOAT_DAMPING;
+    dot.vy *= FLOAT_DAMPING;
+
+    // Update position
+    dot.x += dot.vx;
+    dot.y += dot.vy;
+
+    // Wrap around screen edges
+    if (dot.x < -50) dot.x = BASE_W + 50;
+    if (dot.x > BASE_W + 50) dot.x = -50;
+    if (dot.y < -50) dot.y = BASE_H + 50;
+    if (dot.y > BASE_H + 50) dot.y = -50;
+  });
+}
+
+// ===== PHASE 8 UPDATE: THE RESURFACING =====
+
+function updatePhase8(t) {
+  const p8 = TIMELINE.phase8Start;
+
+  if (t < p8) {
+    floatingWords.forEach(word => word.opacity = 0);
+    return;
+  }
+
+  const timeSinceP8 = t - p8;
+
+  // Text emerges from grey space
   floatingWords.forEach(word => {
-    // Frame 13: The Resurfacing - text becomes primary focus
-    if (timeSinceRupture < emergeStart) {
-      word.opacity = 0;
-    } else if (timeSinceRupture < emergeEnd) {
-      // Slow emergence from grey negative space
-      const emergeProgress = (timeSinceRupture - emergeStart) / WORD_EMERGE_DURATION;
-      const wordProgress = Math.max(0, (emergeProgress - word.fadeDelay * 0.7) / 0.3);
+    if (timeSinceP8 < TIMELINE.textEmergeDuration) {
+      // Slow emergence
+      const progress = timeSinceP8 / TIMELINE.textEmergeDuration;
+      const wordProgress = Math.max(0, (progress - word.fadeDelay * 0.7) / 0.3);
       word.opacity = easeOutCubic(Math.min(1, wordProgress));
     } else {
       word.opacity = 1;
     }
 
-    // Words drift with more visible, fluid movement
+    // Words drift with fluid movement
     if (word.opacity > 0) {
       word.vx += (random() - 0.5) * WORD_DRIFT;
       word.vy += (random() - 0.5) * WORD_DRIFT;
@@ -1248,6 +1071,165 @@ function updateFloatingWords(t, phase5Start) {
     }
   });
 }
+
+// ===== PHASE 9 UPDATE: THE FADE =====
+
+function updatePhase9(t) {
+  const p9 = TIMELINE.phase9Start;
+
+  if (t < p9) {
+    // Before Phase 9: all strokes visible
+    const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
+    allDots.forEach(dot => {
+      dot.strokeOpacity = 1;
+    });
+    return;
+  }
+
+  const timeSinceP9 = t - p9;
+  const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
+
+  // Strokes gradually fade (small dots only, large dots keep strokes)
+  allDots.forEach(dot => {
+    if (dot.isLarge) {
+      // Large dots always keep their strokes
+      dot.strokeOpacity = 1;
+    } else {
+      // Small dots gradually lose strokes
+      if (timeSinceP9 < TIMELINE.strokeFadeDuration) {
+        const progress = timeSinceP9 / TIMELINE.strokeFadeDuration;
+        dot.strokeOpacity = 1 - easeOutCubic(progress);
+      } else {
+        dot.strokeOpacity = 0;
+      }
+    }
+  });
+}
+
+// ===== PHASE 10 UPDATE: THE SNAKE GAME =====
+
+function updatePhase10(t) {
+  const p10 = TIMELINE.phase10Start;
+
+  if (t < p10) return;
+
+  const allDots = [...tangentDots, ...Object.values(fillDots).flat()];
+
+  // Grid-based snake movement for small dots
+  allDots.forEach(dot => {
+    if (dot.isLarge) return;  // Only small dots use snake mechanics
+
+    if (dot.snakeHead) {
+      // Snake heads move independently
+      dot.snakeStepTimer -= 1/60;
+
+      if (dot.snakeStepTimer <= 0) {
+        dot.snakeStepTimer = BLUE_STEP_INTERVAL;
+
+        // Markov chain: randomly change direction
+        if (Math.random() < BLUE_DIRECTION_CHANGE) {
+          dot.snakeDirection = Math.floor(Math.random() * 4);
+        }
+
+        // Store previous position for followers
+        dot.prevX = dot.x;
+        dot.prevY = dot.y;
+
+        // Move in grid-based direction
+        if (dot.snakeDirection === 0) dot.x += BLUE_GRID_SIZE;
+        else if (dot.snakeDirection === 1) dot.y += BLUE_GRID_SIZE;
+        else if (dot.snakeDirection === 2) dot.x -= BLUE_GRID_SIZE;
+        else if (dot.snakeDirection === 3) dot.y -= BLUE_GRID_SIZE;
+
+        // Wrap around screen edges
+        if (dot.x < 0) dot.x = BASE_W;
+        if (dot.x > BASE_W) dot.x = 0;
+        if (dot.y < 0) dot.y = BASE_H;
+        if (dot.y > BASE_H) dot.y = 0;
+
+        // Update followers chain
+        if (dot.snakeFollowers && dot.snakeFollowers.length > 0) {
+          let current = dot.snakeFollowers[0];
+          let prevDot = dot;
+
+          while (current) {
+            current.prevX = current.x;
+            current.prevY = current.y;
+            current.x = prevDot.prevX;
+            current.y = prevDot.prevY;
+
+            prevDot = current;
+            const currentIndex = dot.snakeFollowers.indexOf(current);
+            current = dot.snakeFollowers[currentIndex + 1];
+          }
+        }
+      }
+
+      // Snake eating and cutting interactions
+      for (const other of allDots) {
+        if (other === dot || other.isLarge) continue;
+
+        const dx = other.x - dot.x;
+        const dy = other.y - dot.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // EATING: Two heads collide
+        if (dist < BLUE_EATING_DISTANCE && dot.snakeHead && other.snakeHead) {
+          const myLength = dot.snakeLength || 1;
+          const otherLength = other.snakeLength || 1;
+
+          if (myLength >= otherLength) {
+            other.snakeHead = false;
+            other.snakeFollowing = dot;
+            dot.snakeFollowers = dot.snakeFollowers || [];
+            dot.snakeFollowers.push(other);
+
+            if (other.snakeFollowers && other.snakeFollowers.length > 0) {
+              dot.snakeFollowers = dot.snakeFollowers.concat(other.snakeFollowers);
+              other.snakeFollowers.forEach(f => f.snakeFollowing = dot);
+            }
+
+            dot.snakeLength = dot.snakeFollowers.length + 1;
+            other.snakeFollowers = [];
+            other.snakeLength = 1;
+          }
+        }
+
+        // CUTTING: Head collides with body
+        if (dist < BLUE_CUTTING_DISTANCE && dot.snakeHead && !other.snakeHead) {
+          if (other.snakeFollowing) {
+            const head = other.snakeFollowing;
+            const index = head.snakeFollowers.indexOf(other);
+            if (index > -1) {
+              head.snakeFollowers.splice(index, 1);
+              head.snakeLength = head.snakeFollowers.length + 1;
+            }
+
+            other.snakeHead = true;
+            other.snakeFollowing = null;
+            other.snakeDirection = Math.floor(Math.random() * 4);
+          }
+        }
+      }
+    } else {
+      // Body segments don't move independently
+      dot.vx = 0;
+      dot.vy = 0;
+    }
+  });
+}
+
+// ===== PHASE 11 UPDATE: THE ECOSYSTEM =====
+
+function updatePhase11(t) {
+  const p11 = TIMELINE.phase11Start;
+
+  if (t < p11) return;
+
+  // Final stable state - all systems running in harmony
+  // No additional updates needed, just let everything stabilize
+}
+
 
 // ===== RENDER =====
 
