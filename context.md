@@ -166,9 +166,9 @@ Final stable state - all systems running in harmony
 
 ## Three Distinct Bubble Sizes
 
-1. **Large white bubbles** (from 2026): Always stay white, keep strokes permanently
-2. **Small white bubbles** (30% of other text): Stay white, lose strokes
-3. **Tiny blue dots** (70% of other text): Transform to blue, lose strokes
+1. **Large white bubbles** (from 2026): Always stay white with blue outlines, maintain size and strokes permanently
+2. **Small white bubbles** (30% of other text): White fill remains, blue outline fades away in Phase 6
+3. **Tiny blue dots** (70% of other text): Blue outline collapses inward as white fill becomes blue and shrinks to 25% in Phase 6
 
 ## Rendering Order (bottom to top)
 
@@ -325,7 +325,7 @@ const EDGE_THRESHOLDS = {
 4. **Edge Tracing**: Scans image pixels for alpha transitions
 5. **Asynchronous Appearance**: Each dot has individual `delay` property (Phases 2-3)
 6. **Synchronous Growth**: All dots grow together in unison (Phase 4)
-7. **Smooth Transformations**: Color interpolation (white → blue), no popping (Phase 6)
+7. **Outline Collapse Transformation**: Blue dots collapse inward while white dots lose outlines (Phase 6)
 8. **Dual Movement Systems**:
    - Large dots: Brownian motion with attraction points (Phase 7)
    - Small dots: Grid-based snake game with eating/cutting (Phase 10)
@@ -476,7 +476,8 @@ node extract-text.mjs         # Extract text positions
 **Smooth Transitions**: Everything transforms gradually
 - No popping or disappearing
 - Color interpolation (not sudden switches)
-- Stroke fades applied to all dots uniformly
+- Outline collapse effect: strokes fade as dots transform (Phase 6)
+- Individual delays create organic, asynchronous transformation
 
 ## Security
 - API keys stored in `.env` file (NOT committed to git)
