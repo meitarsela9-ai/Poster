@@ -706,6 +706,15 @@
           </div>
           <div class="info">How long text takes to fade in</div>
         </div>
+
+        <div class="control-group">
+          <label>Text Size Scale</label>
+          <div class="control-row">
+            <input type="range" id="text-size-scale" min="0.3" max="3.0" step="0.1" value="1.0">
+            <span class="value-display" id="text-size-scale-val">1.0x</span>
+          </div>
+          <div class="info">Scale factor for floating text size</div>
+        </div>
       </div>
     </div>
 
@@ -886,6 +895,7 @@
 
       // Phase 8
       setupControl('text-emerge-duration');
+      setupControl('text-size-scale', 'x');
 
       // Phase 9
       setupControl('stroke-fade-duration');

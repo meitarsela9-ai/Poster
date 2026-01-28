@@ -94,6 +94,7 @@ function exportSettings() {
     },
 
     phase8: {
+      textSizeScale: getParam('text-size-scale', 1.0)
       // Text emergence duration is in timeline
     },
 
@@ -310,11 +311,12 @@ let BLUE_DIRECTION_CHANGE = 0.15;   // Probability of changing direction each st
 let BLUE_EATING_DISTANCE = 12;      // Distance within which dots can eat each other (now dynamic)
 let BLUE_CUTTING_DISTANCE = 8;      // Distance for snake cutting collision (now dynamic)
 
-// Phase 5: Background Data Layer (floating words)
+// Phase 8: Background Data Layer (floating words)
 const WORD_EMERGE_DELAY = 3.0;  // Words emerge after rupture begins
 const WORD_EMERGE_DURATION = 4.0;  // Slow emergence from grey space
 const WORD_DRIFT = 0.8;  // Much faster, more fluid drift
 const WORD_DAMPING = 0.96;  // Less damping for more fluid movement
+let TEXT_SIZE_SCALE = 1.0;  // Scale factor for floating text size (now dynamic)
 
 // Edge detection thresholds
 const EDGE_THRESHOLDS = {
@@ -518,6 +520,9 @@ function setupParameterListeners() {
     'gust-frequency': (v) => GUST_FREQUENCY = v,
     'speed-var-min': (v) => SPEED_VARIATION_MIN = v,
     'speed-var-max': (v) => SPEED_VARIATION_MAX = v,
+
+    // Phase 8
+    'text-size-scale': (v) => TEXT_SIZE_SCALE = v,
 
     // Phase 9
     'stroke-fade-duration': (v) => TIMELINE.strokeFadeDuration = v,
@@ -2017,7 +2022,7 @@ function drawFloatingWords() {
     if (word.opacity > 0) {
       push();
       fill(0, 10, 27, word.opacity * 255);  // Match the SVG text color #000A1B
-      textSize(word.size);
+      textSize(word.size * TEXT_SIZE_SCALE);  // Apply user-controlled scale
 
       // Apply font weight (p5.js doesn't have direct fontWeight, but we can use textStyle)
       if (word.fontWeight >= 700) {

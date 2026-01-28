@@ -1,7 +1,7 @@
 # TIMES LANGUAGE 2026 - ANIMATED POSTER
 
 ## Project Overview
-Animated poster for "Times Language 2026" exhibition. Five-phase animation system built in p5.js with dynamic dot growth, smooth transformations, and emergent behavior patterns.
+Animated poster for "Times Language 2026" exhibition. Eleven-phase animation system built in p5.js with dynamic dot growth, smooth transformations, and emergent behavior patterns. Features dual movement systems: Brownian motion with attraction points for large dots, and grid-based snake game mechanics for small dots.
 
 ## Files Structure
 ```
@@ -9,7 +9,7 @@ p5js/
 ├── index.html                      # Entry point (standard animation)
 ├── interactive.html                # Interactive version with control panel
 ├── src/
-│   ├── sketch.js                   # Main animation (complete 5-phase system)
+│   ├── sketch.js                   # Main animation (complete 11-phase system)
 │   └── sketch-interactive.js       # Interactive animation with real-time parameter control
 ├── export/
 │   ├── export.html                 # Export utility page
@@ -47,212 +47,260 @@ Figma API credentials are stored in `.env` file:
 - `FILE_KEY` - Figma file key
 - `TARGET_FRAME_ID` - Target frame ID
 
-## Animation Phases (Total: ~2 minutes 15 seconds)
+## Animation Phases (Total: ~2 minutes / 116 seconds)
+
+The animation is divided into 11 distinct phases, each with specific behaviors and visual effects:
 
 ### Phase 1: The Breath (2.5s - 28.0s)
 A breathing graphic design poster - rectangle breathes around "Times Language"
 
-- Rectangle fades in (2.5s)
-- Inhale: unified expansion of rectangle + text (4.5s)
-- Hold breath at peak (3.0s)
-- Exhale: unified contraction back to origin (4.5s)
-- Release: slow growth to poster edges (7.0s)
-- Ghosting: rectangle fades, corner dots remain as anchors (4.0s)
+- **Rectangle fade-in** (2.5s): Rectangle appears around text
+- **Inhale** (4.5s): Unified expansion of rectangle + text
+- **Hold** (3.0s): Pause at peak inflation
+- **Exhale** (4.5s): Unified contraction back to origin
+- **Release** (7.0s): Slow growth to poster edges, locking into place
+- **Ghosting** (4.0s): Rectangle fades, corner dots remain as anchors
 
 **Implementation**: Rectangle drawn with p5.js primitives (1px stroke), corner dots/handles drawn separately
 
 ### Phase 2: The Constellation (28.0s - 40.0s)
-Stars flickering on a horizon - tangent dots appear on "2026"
+Stars flickering on a horizon - tangent dots twinkle on "2026"
 
 - Dots appear at horizontal/vertical tangent points on 2026
 - Asynchronous appearance over 12 seconds
 - Each dot has random delay for organic rippling effect
-- Creates mesmerizing twinkling
+- Twinkling effect creates mesmerizing star-like appearance
 
 ### Phase 3: The Infusion (40.0s - 70.0s)
 Slow, creeping density - dots gradually fill all elements
 
-- Dots appear on all elements (2026, Times, Language, address, etc.)
-- **Density**: 45% for 2026 (large), 50% for other text (small)
+- Dots sprinkle onto all elements (2026, Times, Language, address, etc.)
+- **Density**: 15% for 2026 (large), 20% for other text (small)
 - Completely randomized timing over 30 seconds
-- Creates continuous surprise and discovery
+- Creates continuous surprise and discovery like rain on pavement
 
 ### Phase 4: The Bloom (70.0s - 89.0s)
 Synchronized expansion - all dots grow together
 
 - **Wait period** (70.0s - 71.0s): All dots fully generated, pause before growth
-- **Synchronized growth** (71.0s - 89.0s): All dots grow together in unison (18s)
+- **Synchronized growth** (71.0s - 89.0s): All dots expand in unison (18s)
 - **Large bubbles** (2026): grow 13x original size
 - **Small bubbles** (other text): grow 5x original size
 - Stroke weight scales from 1.2x to 3.5x as dots expand
-- Unified bloom effect, peak saturation
+- Exponential easing creates dramatic "pop" effect
 
-### Phase 5: Transformation & Emergence (89.0s+)
-Smooth metamorphosis with emergent behavior - the ecosystem reveals itself
+### Phase 5: The Dispersion (89.0s - 92.0s)
+Initial explosion scatters all dots across the canvas
 
-#### Visual Transformations (smooth, no popping):
-- **Poster fade** (89.0s): Original graphics fade out instantly
-- **Blue transformation** (89.0s - 89.5s): 70% of small dots instantly transform white → blue (0.5s)
-  - Happens BEFORE dispersion so dots are already colored
-  - Blue dots shrink to 25% of small white size
-- **Dispersion explosion** (89.0s - 92.0s): All small dots scatter across screen (3s)
-- **Snake game starts** (92.0s+): Grid-based movement, eating, and cutting begins
-- **Stroke fade** (101.0s - 116.0s):
-  - Small dots gradually lose blue outlines (15s)
-  - Large white dots keep their outlines permanently
-  - Final state: small dots are pure (no strokes), large dots keep strokes
-- **Text emerges** (97.0s - 105.0s): Background text layer fades in (8s)
+- **Poster fade**: Original graphics fade out immediately
+- **Fast Brownian explosion**: All dots (large and small) scatter with 20x speed
+- **Duration**: 3 seconds of rapid dispersion
+- **Purpose**: Spreads dots across entire canvas before specialized behaviors begin
+- Creates dramatic explosive "scatter bomb" effect
 
-#### Three Distinct Bubble Sizes:
-1. **Large white bubbles** (from 2026): Always stay white, lose stroke
-2. **Small white bubbles** (from other text): 30% stay white, lose stroke
-3. **Tiny blue dots** (from other text): 70% transform to blue, lose stroke
+### Phase 6: The Transformation (89.0s - 89.5s)
+Small dots undergo color transformation (overlaps with Phase 5)
 
-#### Initial Dispersion - All Dots Scatter:
-During the first 3 seconds of Phase 5, ALL dots (large and small) explode outward:
+- **Blue transformation**: 70% of small dots transform white → blue (0.5s)
+- Happens during dispersion so dots are colored while scattering
+- **Size change**: Blue dots shrink to 25% of small white size
+- **Large bubbles** (2026): Always stay white
+- **Small bubbles** (other text): 30% stay white, 70% turn blue
 
-- **Dispersion Time**: 3 seconds (BLUE_DISPERSION_TIME)
-- **Very Fast Brownian Motion**: All dots scatter with 20x speed (BLUE_DISPERSION_SPEED)
-- **Purpose**: Spreads dots across entire canvas before they adopt specific behaviors
-- Creates dramatic explosive "scatter bomb" effect at start of Phase 5
+### Phase 7: The Float (92.0s onwards)
+Large dots drift with Brownian motion and attraction points
 
-#### Organic Floating - Brownian Motion with Attraction Points:
-After initial dispersion, large dots float with Brownian motion while being gently drawn to focal points:
-
-- **5 Attraction Points**: Scattered across canvas (top-left, top-right, center, bottom-left, bottom-right)
-  - Dots are gently pulled toward nearest point (0.03 attraction strength)
-  - Creates natural clustering tendency without rigid grouping
-- **Minimum Distance**: Dots stop at half a dot's radius from attraction points
-  - Prevents dots from clumping directly on points
-  - Creates organic spacing around focal areas
-- **Brownian Motion**: Random, jittery movement (0.15 speed)
-  - Primary movement style - not directional wind
-  - Creates natural, unpredictable paths
-- **Frequent Gusts**: Very strong random forces (5.0 strength, 40% frequency)
-  - Constantly blows dots away when they get near attraction points
-  - Keeps movement very dynamic and prevents stagnation
-- **Individual speed variation**: Each dot assigned random speed (0.7x - 1.3x)
-  - Some dots drift faster, some slower
+- **5 Attraction Points**: Scattered across canvas creating natural clustering
+- **Gentle attraction**: Dots pulled toward nearest point (0.03 strength)
+- **Brownian motion**: Random, jittery movement (0.15 speed for large dots)
+- **Frequent gusts**: Strong random forces (5.0 strength, 40% frequency)
+- **Minimum distance**: Dots stop at half radius from attraction points
+- **Individual variation**: Random speed multipliers (0.7x - 1.3x)
 - **Medium damping** (0.97): Natural deceleration
+- Creates gentle, jittery floating with organic clustering
 
-**Result**: Gentle, jittery floating with natural clustering around focal points - dynamic but calm
+### Phase 8: The Resurfacing (97.0s - 105.0s)
+Background text emerges from grey space
 
-#### Small Dot Snake Game:
-After initial dispersion, all small dots (both white and blue) use grid-based Markov walks with eating and cutting mechanics:
-
-- **Who**: Small white dots (30%) + Small blue dots (70% transform from white)
-  - Blue dots smoothly transform from white during Phase 5 (not created separately)
-  - Total small dot count remains constant - blue replaces white, doesn't add to it
-- **Grid-based Markov walk**: Dots move in discrete steps on a grid (8px cells)
-- **4-directional movement**: Only up, down, left, right (like classic snake game)
-- **Random direction changes**: 15% chance to change direction each step
-- **Snake eating**: When two snake heads collide (any color), the larger eats the smaller
-  - Eaten snake becomes body segments following the eater
-  - White snakes can eat blue snakes and vice versa
-  - Snakes grow by eating other snakes
-  - **Proper chain following**: Each segment follows the one ahead (creates long snakes)
-- **Snake cutting**: When a snake head collides with another snake's body, it cuts that snake
-  - The body segment becomes a new independent snake head
-  - Creates dynamic splitting and reformation
-- **Step interval**: 0.15 seconds between moves (speed of snake movement)
-- **Large white dots**: Only large dots (from 2026) use much faster, fluid Brownian motion (1.2 speed, 0.95 damping)
-  - Always keep their blue outlines (never fade)
-  - Always rendered on top of small dots and text
-
-#### Floating Text Layer:
-Background text broken into 1-4 character chunks, randomly scattered across canvas:
-
-- **Random positioning**: Chunks placed randomly across entire screen (not at original Figma positions)
-- Text rendered **at bottom layer** (underneath all dots)
-- Sometimes hidden when bubbles pass over
+- Text chunks fade in over 8 seconds
+- Asynchronous appearance with individual delays
+- **Text format**: 1-4 character chunks randomly positioned
+- Text rendered at **bottom layer** (underneath all dots)
+- Chunks drift with fluid Brownian motion (0.8 speed, 0.96 damping)
 - Creates layered depth effect with fragmented, scattered text
-- Chunks drift independently with fluid Brownian motion (0.8 speed, 0.96 damping)
-- **Rendering order**: Text (bottom) → Small dots (middle) → Large dots (top)
+
+### Phase 9: The Fade (101.0s - 116.0s)
+Stroke outlines gradually disappear from small dots
+
+- **Small dots**: Blue outlines fade over 15 seconds
+- **Large white dots**: Keep their blue outlines permanently
+- **Final state**: Small dots are pure (no strokes), large dots retain strokes
+- Creates visual separation between large and small elements
+
+### Phase 10: The Snake Game (92.0s onwards)
+Small dots follow grid-based movement with eating and cutting mechanics (overlaps with Phase 7)
+
+- **Who**: ALL small dots (both white 30% and blue 70%)
+- **Grid-based Markov walk**: Discrete 4-directional movement (8px cells)
+- **Direction changes**: 15% probability each step
+- **Snake eating**: Larger snakes eat smaller ones on head collision
+  - Eaten snake becomes body segments
+  - Creates chain-following behavior
+- **Snake cutting**: Head colliding with body cuts the snake
+  - Body segment becomes new independent head
+  - Dynamic splitting and reformation
+- **Step interval**: 0.15 seconds between moves
+- White and blue snakes can eat each other
+
+### Phase 11: The Ecosystem (116.0s onwards)
+Final stable state - all systems running in harmony
+
+- All behaviors continue indefinitely
+- **Large dots**: Float with attraction points and Brownian motion
+- **Small dots**: Continue snake game mechanics
+- **Text**: Drifts in background layer
+- System reaches equilibrium with all elements coexisting
+
+## Three Distinct Bubble Sizes
+
+1. **Large white bubbles** (from 2026): Always stay white, keep strokes permanently
+2. **Small white bubbles** (30% of other text): Stay white, lose strokes
+3. **Tiny blue dots** (70% of other text): Transform to blue, lose strokes
+
+## Rendering Order (bottom to top)
+
+1. **Text layer** (bottom): Floating word chunks
+2. **Small dots** (middle): White and blue small bubbles
+3. **Large dots** (top): Large white bubbles from 2026
 
 ## Key Configuration
 
 **Note**: All parameters below are adjustable in real-time via the interactive version (`interactive.html`).
 
+### Timeline Configuration
+
 ```javascript
 const TIMELINE = {
+  // Phase 1: The Breath
   phase1Start: 2.5,
-  rectForm: 2.5,
-  breathInhale: 4.5,
-  breathHold: 3.0,
-  breathExhale: 4.5,
-  releaseGrow: 7.0,
-  ghostFade: 4.0,
+  rectForm: 2.5,        // Rectangle fade-in duration
+  breathInhale: 4.5,    // Inhale duration
+  breathHold: 3.0,      // Hold at peak duration
+  breathExhale: 4.5,    // Exhale duration
+  releaseGrow: 7.0,     // Release/lock into place duration
+  ghostFade: 4.0,       // Rectangle fade-out duration
 
+  // Phase 2: The Constellation
   phase2Start: 28.0,
-  tangentAppear: 12.0,
+  tangentAppear: 12.0,  // Tangent dots appearance duration
 
+  // Phase 3: The Infusion
   phase3Start: 40.0,
-  gradualFill: 30.0,
+  gradualFill: 30.0,    // Fill dots appearance duration
 
+  // Phase 4: The Bloom
   phase4Start: 70.0,
-  dotsGrowStartDelay: 1.0,
-  dotsGrow: 18.0,
+  dotsGrowStartDelay: 1.0,  // Wait before growth begins
+  dotsGrow: 18.0,           // Synchronized growth duration
 
+  // Phase 5: The Dispersion
   phase5Start: 89.0,
-  blueTransformStart: 8.0,
-  blueTransformDuration: 12.0,
-  strokeFadeStart: 12.0,
-  strokeFadeDuration: 15.0,
-  textEmergeStart: 8.0,
-  textEmergeDuration: 8.0,
+  dispersionDuration: 3.0,  // Explosion scatter duration
 
-  holdFinal: 20.0
+  // Phase 6: The Transformation
+  phase6Start: 89.0,            // Overlaps with Phase 5
+  blueTransformDuration: 0.5,   // Color transformation duration
+
+  // Phase 7: The Float
+  phase7Start: 92.0,    // Floating behavior begins
+
+  // Phase 8: The Resurfacing
+  phase8Start: 97.0,
+  textEmergeDuration: 8.0,  // Text fade-in duration
+
+  // Phase 9: The Fade
+  phase9Start: 101.0,
+  strokeFadeDuration: 15.0,  // Stroke fade-out duration
+
+  // Phase 10: The Snake Game
+  phase10Start: 92.0,   // Overlaps with Phase 7
+
+  // Phase 11: The Ecosystem
+  phase11Start: 116.0   // Final stable state
 };
+```
 
+### Dot Configuration
+
+```javascript
 // Dot density
-const FILL_TARGET = 0.45;           // 45% fill for 2026 (large bubbles)
-const FILL_TARGET_SMALL = 0.5;      // 50% fill for small text
-const TANGENT_DOT_RADIUS = 3;       // Same as fill dots (uniform size)
-const FILL_DOT_RADIUS = 3;
+const FILL_TARGET = 0.15;           // 15% fill for 2026 (large bubbles)
+const FILL_TARGET_SMALL = 0.20;     // 20% fill for small text
+const TANGENT_DOT_RADIUS = 3;       // Radius for tangent dots
+const FILL_DOT_RADIUS = 3;          // Radius for fill dots
 
-// Dot growth
+// Dot growth (Phase 4)
 const DOT_GROW_2026 = 13;           // Large bubbles grow 13x
 const DOT_GROW_OTHER = 5;           // Small bubbles grow 5x
 const STROKE_GROW_MAX = 3.5;        // Stroke grows 3.5x at peak
+```
 
-// Transformation
+### Transformation Configuration (Phase 6)
+
+```javascript
 const BLUE_DOT_PERCENTAGE = 0.7;    // 70% of small dots turn blue
 const BLUE_DOT_SHRINK_OTHER = 0.25; // Blue dots shrink to 25% of small white
+```
 
-// Organic floating (Brownian motion with attraction points)
+### Floating Behavior Configuration (Phase 7)
+
+```javascript
+// Brownian motion with attraction points
 const BASE_SPEED = 0.12;               // Base Brownian motion for small dots
-const LARGE_DOT_SPEED = 0.15;          // Brownian motion speed for large white dots
-const FLOAT_DAMPING = 0.97;            // Medium damping for natural deceleration
-const ATTRACTION_STRENGTH = 0.03;      // Gentle pull toward nearest attraction point
-const MIN_DISTANCE_FROM_POINT = 0.5;   // Dots stop at half a dot's radius from points
-const GUST_STRENGTH = 5.0;             // Very strong gusts to blow dots away
+const LARGE_DOT_SPEED = 0.15;          // Brownian motion speed for large dots
+const FLOAT_DAMPING = 0.97;            // Medium damping for deceleration
+const ATTRACTION_STRENGTH = 0.03;      // Pull toward nearest attraction point
+const MIN_DISTANCE_FROM_POINT = 0.5;   // Stop at half radius from points
+const GUST_STRENGTH = 5.0;             // Strong gusts to blow dots away
 const GUST_FREQUENCY = 0.4;            // 40% chance per frame of a gust
-const SPEED_VARIATION_MIN = 0.7;       // Some dots drift slower
-const SPEED_VARIATION_MAX = 1.3;       // Some dots drift faster
+const SPEED_VARIATION_MIN = 0.7;       // Minimum speed multiplier
+const SPEED_VARIATION_MAX = 1.3;       // Maximum speed multiplier
+```
 
-// Initial dispersion (all dots)
-const BLUE_DISPERSION_TIME = 3.0;   // Initial explosion/dispersion duration (seconds)
-const BLUE_DISPERSION_SPEED = 20.0; // Speed multiplier during dispersion (very fast explosion)
-const BLUE_GRID_SIZE = 8;           // Grid cell size for discrete movement
+### Snake Game Configuration (Phase 10)
+
+```javascript
+const BLUE_DISPERSION_TIME = 3.0;   // Initial dispersion duration (Phase 5)
+const BLUE_DISPERSION_SPEED = 20.0; // Speed multiplier during dispersion
+const BLUE_GRID_SIZE = 8;           // Grid cell size (pixels)
 const BLUE_STEP_INTERVAL = 0.15;    // Time between steps (seconds)
-const BLUE_DIRECTION_CHANGE = 0.15; // Probability of changing direction
-const BLUE_EATING_DISTANCE = 12;    // Distance for eating another snake
-const BLUE_CUTTING_DISTANCE = 8;    // Distance for cutting a snake
+const BLUE_DIRECTION_CHANGE = 0.15; // Probability of direction change
+const BLUE_EATING_DISTANCE = 12;    // Distance for eating collision (pixels)
+const BLUE_CUTTING_DISTANCE = 8;    // Distance for cutting collision (pixels)
+```
+
+### Text Layer Configuration (Phase 8)
+
+```javascript
+const WORD_DRIFT = 0.8;             // Brownian motion speed for text
+const WORD_DAMPING = 0.96;          // Damping for text movement
+const TEXT_SIZE_SCALE = 1.0;        // Scale factor for floating text size (0.3x - 3.0x)
 ```
 
 ## Sampling Strategy (for performance & aesthetics)
 
 ```javascript
 // Edge sampling spacing (pixels between dots)
-allEdges.numbers2026 = sampleEdges(..., 15);      // Moderate spacing for dense coverage
-allEdges.times = sampleEdges(..., 4);             // Tight spacing for high density
-allEdges.language = sampleEdges(..., 4);
-allEdges.address = sampleEdges(..., 4);
-allEdges.topBlock = sampleEdges(..., 4);
-allEdges.bottomLeft = sampleEdges(..., 4);
+allEdges.numbers2026 = sampleEdges(..., 25);      // Moderate spacing (configurable)
+allEdges.times = sampleEdges(..., 6);             // Tight spacing (configurable)
+allEdges.language = sampleEdges(..., 6);
+allEdges.address = sampleEdges(..., 6);
+allEdges.topBlock = sampleEdges(..., 6);
+allEdges.bottomLeft = sampleEdges(..., 6);
 
-// Tangent detection
-const spacing = 15;  // Check every 15 pixels (moderate tangent dot density)
+// Tangent detection (Phase 2)
+const TANGENT_SPACING = 25;  // Check every 25 pixels (configurable via interactive)
+const TANGENT_THRESHOLD = 0.15;  // Edge straightness threshold (configurable)
 ```
 
 ## Technical Implementation
@@ -268,15 +316,19 @@ const EDGE_THRESHOLDS = {
 ```
 
 ### Key Features
-1. **Phase 1 Rectangle**: p5.js primitives, corner dots stay circular during scaling
-2. **Dynamic Text Rendering**: Times/Language rendered every frame for smooth scaling
-3. **Edge Tracing**: Scans image pixels for alpha transitions
-4. **Asynchronous Appearance**: Each dot has individual `delay` property
-5. **Synchronous Growth**: All dots grow together in unison (no individual delays)
-6. **Smooth Transformations**: Color interpolation (white → blue), no popping
-7. **Organic Floating**: Wind forces and speed variation for natural, leaf-like movement
-8. **Screen Wrapping**: Dots wrap around edges for freedom of movement
-9. **Floating Text Chunks**: Background text broken into 1-4 character chunks, randomly scattered across screen, rendered beneath bubbles
+1. **11-Phase System**: Modular phase-based animation with clear transitions
+2. **Phase 1 Rectangle**: p5.js primitives, corner dots stay circular during scaling
+3. **Dynamic Text Rendering**: Times/Language rendered every frame for smooth scaling
+4. **Edge Tracing**: Scans image pixels for alpha transitions
+5. **Asynchronous Appearance**: Each dot has individual `delay` property (Phases 2-3)
+6. **Synchronous Growth**: All dots grow together in unison (Phase 4)
+7. **Smooth Transformations**: Color interpolation (white → blue), no popping (Phase 6)
+8. **Dual Movement Systems**:
+   - Large dots: Brownian motion with attraction points (Phase 7)
+   - Small dots: Grid-based snake game with eating/cutting (Phase 10)
+9. **Screen Wrapping**: Dots wrap around edges for freedom of movement
+10. **Floating Text Chunks**: Background text broken into 1-4 character chunks, randomly scattered, rendered beneath bubbles (Phase 8)
+11. **Real-time Controls**: All parameters adjustable via interactive dashboard
 
 ### Dot Properties
 Each dot tracks:
@@ -284,15 +336,25 @@ Each dot tracks:
 - `r` - Radius
 - `opacity` - Visibility (0-1)
 - `delay` - Appearance delay (Phase 2/3)
-- `growthDelay` - Growth delay (Phase 4)
+- `growthDelay` - Growth delay (unused, for potential future use)
 - `scale` - Individual scale factor
 - `fate` - 'foam' (white) or 'residue' (blue)
 - `isLarge` - true for 2026 dots, false for others
 - `transformProgress` - Color transition progress (0-1)
+- `transformDelay` - Individual delay for transformation
 - `strokeOpacity` - Stroke visibility (0-1)
 - `speedMultiplier` - Random speed variation (0.7 - 1.3x)
-- `windPhase` - Phase offset for wind response (creates variation)
-- `vx, vy` - Velocity (Phase 5)
+- `windPhase` - Phase offset for random motion
+- `vx, vy` - Velocity (Phase 5+)
+
+**Snake game properties** (small dots only):
+- `snakeDirection` - Movement direction (0-3: right, down, left, up)
+- `snakeStepTimer` - Time until next step
+- `snakeHead` - Boolean, true if independent head
+- `snakeFollowing` - Reference to dot being followed (if body segment)
+- `snakeFollowers` - Array of dots following this one
+- `snakeLength` - Total length of snake chain
+- `prevX, prevY` - Previous position (for follower chain)
 
 ## How to Run
 
@@ -342,16 +404,40 @@ The interactive version includes:
 - 2026 and other dot growth scales
 - Stroke growth maximum
 
-**Phase 5: Transformation & Emergence**
-- Blue transformation timing and duration
-- Blue dot percentage and shrink factor
-- Float speed and damping
-- Kinship radius and crowding threshold
-- Personality distribution (leader/follower/loner/wanderer percentages)
-- Personality speed multipliers
-- Social forces (follower attraction, loner repulsion)
-- Text emergence timing
-- Regenerate button for new personality assignments
+**Phase 5: The Dispersion**
+- Dispersion duration (explosion time)
+- Dispersion speed multiplier
+
+**Phase 6: The Transformation**
+- Blue transformation duration
+- Blue dot percentage (how many turn blue)
+- Blue dot shrink factor
+
+**Phase 7: The Float**
+- Base float speed (small dots)
+- Large dot speed
+- Float damping
+- Attraction strength
+- Minimum distance from attraction points
+- Gust strength and frequency
+- Speed variation min/max
+
+**Phase 8: The Resurfacing**
+- Text emerge duration
+- Text size scale (0.3x - 3.0x)
+
+**Phase 9: The Fade**
+- Stroke fade duration
+
+**Phase 10: The Snake Game**
+- Grid size
+- Step interval (snake speed)
+- Direction change probability
+- Eating and cutting distances
+
+**Phase 11: The Ecosystem**
+- No additional controls (final stable state)
+- Regenerate button for all dot properties
 
 ## Figma Integration
 
@@ -366,9 +452,10 @@ node extract-text.mjs         # Extract text positions
 
 ## Design Philosophy
 
-**Pacing**: Consistent, captivating rhythm throughout (~2m 15s total)
-- No jarring fast sections
+**Pacing**: Consistent, captivating rhythm throughout (~2 minutes total)
+- 11 distinct phases with clear transitions
 - Each phase unfolds at a mesmerizing pace
+- Overlapping phases create continuous evolution
 - Longer durations allow appreciation of transformations
 
 **Visual Hierarchy**: Three clear bubble sizes
@@ -376,11 +463,12 @@ node extract-text.mjs         # Extract text positions
 - Small white (supporting layer)
 - Tiny blue (detail/texture)
 
-**Organic Movement**: Natural, wind-driven floating creates calm, flowing patterns
-- Gentle drift like leaves on a breeze
-- Individual speed variation creates natural diversity
-- Slow wind direction changes produce graceful, swirling motion
-- No rigid behaviors - pure organic flow
+**Organic Movement**: Natural floating with multiple behavior systems creates dynamic patterns
+- **Large dots**: Brownian motion with attraction to 5 focal points
+- **Small dots**: Grid-based snake game with eating and cutting mechanics
+- Individual speed variation creates natural diversity (0.7x - 1.3x)
+- Frequent gusts keep movement dynamic and prevent stagnation
+- Emergent complexity from simple rules
 
 **Smooth Transitions**: Everything transforms gradually
 - No popping or disappearing
