@@ -201,30 +201,30 @@ let TIMELINE = {
 
   // Phase 5: The Dispersion - Initial explosion
   phase5Start: 89.0,            // Dispersion begins
-  dispersionDuration: 3.0,      // Fast Brownian explosion to scatter dots
+  dispersionDuration: 5.0,      // Fast Brownian explosion to scatter dots
 
   // Phase 6: The Transformation - Color shift
-  phase6Start: 92.0,            // Blue transformation (after dispersion completes)
+  phase6Start: 94.0,            // Blue transformation (after dispersion completes)
   blueTransformDuration: 0.5,   // Nearly instant transformation to blue
 
   // Phase 7: The Float - Brownian motion ecosystem
-  phase7Start: 92.0,            // Floating behavior begins (after dispersion)
+  phase7Start: 94.0,            // Floating behavior begins (after dispersion)
   // Ongoing: Large dots use attraction points, small dots use snake game
 
   // Phase 8: The Resurfacing - Text emerges from grey space
-  phase8Start: 97.0,            // Text starts emerging
+  phase8Start: 99.0,            // Text starts emerging
   textEmergeDuration: 8.0,      // Text fade-in duration
 
   // Phase 9: The Fade - Strokes disappear
-  phase9Start: 101.0,           // Strokes start fading
+  phase9Start: 103.0,           // Strokes start fading
   strokeFadeDuration: 15.0,     // Gradual stroke removal
 
   // Phase 10: The Snake Game - Grid-based movement
-  phase10Start: 92.0,           // Snake mechanics active (after dispersion)
+  phase10Start: 94.0,           // Snake mechanics active (after dispersion)
   // Ongoing: Small dots follow grid-based Markov walk with eating/cutting
 
   // Phase 11: The Ecosystem - Final stable state
-  phase11Start: 116.0           // Ecosystem fully stabilized
+  phase11Start: 118.0           // Ecosystem fully stabilized
 };
 
 // Recalculate phase start times based on current timeline

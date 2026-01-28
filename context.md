@@ -47,7 +47,7 @@ Figma API credentials are stored in `.env` file:
 - `FILE_KEY` - Figma file key
 - `TARGET_FRAME_ID` - Target frame ID
 
-## Animation Phases (Total: ~2 minutes / 116 seconds)
+## Animation Phases (Total: ~2 minutes / 118 seconds)
 
 The animation is divided into 11 distinct phases, each with specific behaviors and visual effects:
 
@@ -89,17 +89,17 @@ Synchronized expansion - all dots grow together
 - Stroke weight scales from 1.2x to 3.5x as dots expand
 - Exponential easing creates dramatic "pop" effect
 
-### Phase 5: The Dispersion (89.0s - 92.0s)
+### Phase 5: The Dispersion (89.0s - 94.0s)
 Initial explosion scatters all dots across the canvas
 
 - **Poster fade**: Original graphics fade out immediately
 - **Fast Brownian explosion**: All dots (large and small) scatter with 20x speed
 - **All dots stay white with blue borders**: Color transformation happens after dispersion
-- **Duration**: 3 seconds of rapid dispersion
+- **Duration**: 5 seconds of rapid dispersion
 - **Purpose**: Spreads dots across entire canvas before specialized behaviors begin
 - Creates dramatic explosive "scatter bomb" effect
 
-### Phase 6: The Transformation (92.0s - 92.5s)
+### Phase 6: The Transformation (94.0s - 94.5s)
 Small dots undergo color transformation (after dispersion completes)
 
 - **Blue transformation**: 70% of small dots transform white → blue (0.5s)
@@ -108,7 +108,7 @@ Small dots undergo color transformation (after dispersion completes)
 - **Large bubbles** (2026): Always stay white
 - **Small bubbles** (other text): 30% stay white, 70% turn blue
 
-### Phase 7: The Float (92.0s onwards)
+### Phase 7: The Float (94.0s onwards)
 Large dots drift with Brownian motion and attraction points
 
 - **5 Attraction Points**: Scattered across canvas creating natural clustering
@@ -120,7 +120,7 @@ Large dots drift with Brownian motion and attraction points
 - **Medium damping** (0.97): Natural deceleration
 - Creates gentle, jittery floating with organic clustering
 
-### Phase 8: The Resurfacing (97.0s - 105.0s)
+### Phase 8: The Resurfacing (99.0s - 107.0s)
 Background text emerges from grey space
 
 - Text chunks fade in over 8 seconds
@@ -130,7 +130,7 @@ Background text emerges from grey space
 - Chunks drift with fluid Brownian motion (0.8 speed, 0.96 damping)
 - Creates layered depth effect with fragmented, scattered text
 
-### Phase 9: The Fade (101.0s - 116.0s)
+### Phase 9: The Fade (103.0s - 118.0s)
 Stroke outlines gradually disappear from small dots
 
 - **Small dots**: Blue outlines fade over 15 seconds
@@ -138,7 +138,7 @@ Stroke outlines gradually disappear from small dots
 - **Final state**: Small dots are pure (no strokes), large dots retain strokes
 - Creates visual separation between large and small elements
 
-### Phase 10: The Snake Game (92.0s onwards)
+### Phase 10: The Snake Game (94.0s onwards)
 Small dots follow grid-based movement with eating and cutting mechanics (overlaps with Phase 7)
 
 - **Who**: ALL small dots (both white 30% and blue 70%)
@@ -153,7 +153,7 @@ Small dots follow grid-based movement with eating and cutting mechanics (overlap
 - **Step interval**: 0.15 seconds between moves
 - White and blue snakes can eat each other
 
-### Phase 11: The Ecosystem (116.0s onwards)
+### Phase 11: The Ecosystem (118.0s onwards)
 Final stable state - all systems running in harmony
 
 - All behaviors continue indefinitely
@@ -206,28 +206,28 @@ const TIMELINE = {
 
   // Phase 5: The Dispersion
   phase5Start: 89.0,
-  dispersionDuration: 3.0,  // Explosion scatter duration
+  dispersionDuration: 5.0,  // Explosion scatter duration
 
   // Phase 6: The Transformation
-  phase6Start: 92.0,            // After dispersion completes
+  phase6Start: 94.0,            // After dispersion completes
   blueTransformDuration: 0.5,   // Color transformation duration
 
   // Phase 7: The Float
-  phase7Start: 92.0,    // Floating behavior begins
+  phase7Start: 94.0,    // Floating behavior begins
 
   // Phase 8: The Resurfacing
-  phase8Start: 97.0,
+  phase8Start: 99.0,
   textEmergeDuration: 8.0,  // Text fade-in duration
 
   // Phase 9: The Fade
-  phase9Start: 101.0,
+  phase9Start: 103.0,
   strokeFadeDuration: 15.0,  // Stroke fade-out duration
 
   // Phase 10: The Snake Game
-  phase10Start: 92.0,   // Overlaps with Phase 7
+  phase10Start: 94.0,   // Overlaps with Phase 7
 
   // Phase 11: The Ecosystem
-  phase11Start: 116.0   // Final stable state
+  phase11Start: 118.0   // Final stable state
 };
 ```
 
@@ -271,7 +271,7 @@ const SPEED_VARIATION_MAX = 1.3;       // Maximum speed multiplier
 ### Snake Game Configuration (Phase 10)
 
 ```javascript
-const BLUE_DISPERSION_TIME = 3.0;   // Initial dispersion duration (Phase 5)
+const BLUE_DISPERSION_TIME = 5.0;   // Initial dispersion duration (Phase 5)
 const BLUE_DISPERSION_SPEED = 20.0; // Speed multiplier during dispersion
 const BLUE_GRID_SIZE = 8;           // Grid cell size (pixels)
 const BLUE_STEP_INTERVAL = 0.15;    // Time between steps (seconds)
