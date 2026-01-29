@@ -33,8 +33,8 @@ const CUT = { yMin: 255, yMax: 565 };
 const NUM_BASE_ALPHA = 70;
 const OVERLAY_NUM_ALPHA = 55;
 const COVER_ALPHA = 300;
-const GLOW_ALPHA = 66;
-const GLOW_BLUR_PX = 35;
+const GLOW_ALPHA = 150;  // Increased for more prominent halo
+const GLOW_BLUR_PX = 50;  // Increased blur radius for wider spread
 
 // ===== TIMELINE (seconds) =====
 const TIMELINE = {
@@ -246,7 +246,7 @@ function setup() {
   // Build layers
   maskSoft = buildSoftAlphaMask(numbersImg);
   coverLayer = makeCoverLayer(maskSoft, COVER_ALPHA);
-  glowLayer = makeGlowLayer(maskSoft);
+  glowLayer = makeGlowLayer(numbersImg);
 
   // Pre-render poster
   posterLayer = createGraphics(BASE_W, BASE_H);
@@ -341,7 +341,7 @@ function findTangentPoints(edges, threshold, radius) {
   const edgeSet = new Set(edges.map(e => `${e.x},${e.y}`));
 
   // Sample edges and check local direction
-  const spacing = 15;  // Moderate spacing for tangent dots
+  const spacing = 8;  // Tighter spacing for better coverage on straight segments
   const checked = new Set();
   
   for (const edge of edges) {
@@ -439,12 +439,12 @@ function initPhase3() {
 }
 
 function traceAllEdges() {
-  // Numbers 2026 - moderate spacing for dense coverage
+  // Numbers 2026 - tighter spacing for better coverage on straight segments
   const numbersG = createGraphics(BASE_W, BASE_H);
   numbersG.pixelDensity(1);
   numbersG.clear();
   numbersG.image(numbersImg, 0, 0, BASE_W, BASE_H);
-  allEdges.numbers2026 = sampleEdges(traceEdgesFromGraphics(numbersG, EDGE_THRESHOLDS.numbers2026), 15);  // Moderate spacing
+  allEdges.numbers2026 = sampleEdges(traceEdgesFromGraphics(numbersG, EDGE_THRESHOLDS.numbers2026), 6);  // Tighter spacing for straights
 
   // Small text elements - tight spacing for high density
   const timesG = renderElementToGraphics(timesImg, items.times);
@@ -1259,15 +1259,10 @@ function renderScene(t) {
     push();
     tint(255, posterOpacity * 255);
 
-    // Draw 2026 with glow
+    // Draw 2026 exactly as it appears in the original image
     push();
-    tint(255, NUM_BASE_ALPHA * posterOpacity);
+    tint(255, posterOpacity * 255);
     image(numbersImg, 0, 0, BASE_W, BASE_H);
-    pop();
-
-    push();
-    tint(255, GLOW_ALPHA * posterOpacity);
-    image(glowLayer, 0, 0, BASE_W, BASE_H);
     pop();
 
     // Draw other elements
@@ -1287,8 +1282,6 @@ function renderScene(t) {
 
     tint(255, posterOpacity * 255);
     image(coverLayer, 0, 0, BASE_W, BASE_H);
-
-    tint(255, OVERLAY_NUM_ALPHA * posterOpacity);
     image(numbersImg, 0, 0, BASE_W, BASE_H);
 
     drawingContext.restore();
@@ -1611,16 +1604,12 @@ function makeCoverLayer(alphaMask, coverAlpha) {
   return img;
 }
 
-function makeGlowLayer(alphaMask) {
-  const g = createGraphics(BASE_W, BASE_H);
-  g.pixelDensity(1);
-  g.background(255);
-  const img = g.get();
-  img.mask(alphaMask);
+function makeGlowLayer(srcImg) {
+  // Create glow by blurring the original image (preserves colors)
   const gg = createGraphics(BASE_W, BASE_H);
   gg.pixelDensity(1);
   gg.drawingContext.filter = `blur(${GLOW_BLUR_PX}px)`;
-  gg.image(img, 0, 0, BASE_W, BASE_H);
+  gg.image(srcImg, 0, 0, BASE_W, BASE_H);
   return gg.get();
 }
 
