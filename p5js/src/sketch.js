@@ -99,32 +99,35 @@ const DOT_STYLE = {
 const RECT_DOT_SPACING = 12;  // spacing for rectangle border dots
 const RECT_DOT_RADIUS = 3;
 const RECT_PADDING = 30;      // padding around Times/Language (increased to avoid dot overlap)
-const RECT_GROW_SCALE = 1.2;  // how much rectangle grows (reduced to avoid going off-screen)
-const TEXT_GROW_SCALE = 1.15; // how much text grows (smaller than rectangle)
+let RECT_GROW_SCALE = 1.2;  // how much rectangle grows (can be updated by config)
+let TEXT_GROW_SCALE = 1.15; // how much text grows (can be updated by config)
 const RECT_POSTER_MARGIN = 20; // margin from poster edges when rectangle grows to poster size
 
-const TANGENT_THRESHOLD = 0.15;  // how "straight" an edge must be (lower = more points)
-const TANGENT_DOT_RADIUS = 3;  // Same as fill dots for consistent large bubble size
+let TANGENT_THRESHOLD = 0.15;  // how "straight" an edge must be (can be updated by config)
+let TANGENT_DOT_RADIUS = 3;  // Same as fill dots (can be updated by config)
+let TANGENT_SPACING = 25;  // Sampling spacing for tangent detection (can be updated by config)
 
-const FILL_TARGET = 0.45;  // 45% fill for 2026 - dense large bubbles
-const FILL_TARGET_SMALL = 0.5;  // 50% fill for small text - high density
-const FILL_DOT_RADIUS = 3;
+let FILL_TARGET = 0.45;  // 45% fill for 2026 (can be updated by config)
+let FILL_TARGET_SMALL = 0.5;  // 50% fill for small text (can be updated by config)
+let FILL_DOT_RADIUS = 3;  // (can be updated by config)
+let FILL_SPACING_2026 = 25;  // Sampling spacing for 2026 (can be updated by config)
+let FILL_SPACING_OTHER = 6;  // Sampling spacing for other text (can be updated by config)
 
 // Phase 4: The Bloom - Aggressive expansion contrast
-const DOT_GROW_2026 = 13;  // 2026 dots balloon aggressively (huge overlapping circles)
-const DOT_GROW_OTHER = 5;  // Other dots grow but stay smaller
-const STROKE_GROW_MAX = 3.5;  // Thick blue outlines at peak (bubble texture)
+let DOT_GROW_2026 = 13;  // 2026 dots balloon aggressively (can be updated by config)
+let DOT_GROW_OTHER = 5;  // Other dots grow but stay smaller (can be updated by config)
+let STROKE_GROW_MAX = 3.5;  // Thick blue outlines at peak (can be updated by config)
 
 // Phase 6: The Transformation - Separation of scales
-const BLUE_DOT_PERCENTAGE = 0.7;  // 70% become blue dots (more blue dots)
+let BLUE_DOT_PERCENTAGE = 0.7;  // 70% become blue dots (can be updated by config)
 const BLUE_DOT_SHRINK_2026 = 0.25;  // Not used (2026 dots stay white)
-const BLUE_DOT_SHRINK_OTHER = 0.25;  // Blue dots shrink to 25% of small white size (even smaller)
+let BLUE_DOT_SHRINK_OTHER = 0.25;  // Blue dots shrink to 25% (can be updated by config)
 const WHITE_FADE_RATE = 0.015;  // White bubbles slowly fade/dissipate
 
 // Phase 7: Organic floating with attraction points
-const BASE_SPEED = 0.12;              // Base Brownian motion for small dots
-const LARGE_DOT_SPEED = 0.15;         // Slower Brownian motion for large white dots (reduced for gentler movement)
-const FLOAT_DAMPING = 0.97;           // Medium damping for natural deceleration
+let BASE_SPEED = 0.12;              // Base Brownian motion for small dots (can be updated by config)
+let LARGE_DOT_SPEED = 0.15;         // Slower Brownian motion for large dots (can be updated by config)
+let FLOAT_DAMPING = 0.97;           // Medium damping (can be updated by config)
 
 // Attraction points - 5 focal points scattered across the canvas
 const ATTRACTION_POINTS = [
@@ -134,32 +137,32 @@ const ATTRACTION_POINTS = [
   { x: BASE_W * 0.3, y: BASE_H * 0.75 },   // Bottom left area
   { x: BASE_W * 0.75, y: BASE_H * 0.7 }    // Bottom right area
 ];
-const ATTRACTION_STRENGTH = 0.03;     // Gentle pull toward nearest point
-const MIN_DISTANCE_FROM_POINT = 0.5;  // Dots stop at half a dot's radius from points
-const GUST_STRENGTH = 5.0;            // Very strong gusts to blow dots away
-const GUST_FREQUENCY = 0.4;           // 40% chance per frame of a gust (very frequent)
+let ATTRACTION_STRENGTH = 0.03;     // Gentle pull toward nearest point (can be updated by config)
+let MIN_DISTANCE_FROM_POINT = 0.5;  // Dots stop at half a dot's radius (can be updated by config)
+let GUST_STRENGTH = 5.0;            // Very strong gusts (can be updated by config)
+let GUST_FREQUENCY = 0.4;           // 40% chance per frame (can be updated by config)
 
 // Speed variation (individual variation)
-const SPEED_VARIATION_MIN = 0.7;      // Some dots drift slower
-const SPEED_VARIATION_MAX = 1.3;      // Some dots drift faster
+let SPEED_VARIATION_MIN = 0.7;      // Some dots drift slower (can be updated by config)
+let SPEED_VARIATION_MAX = 1.3;      // Some dots drift faster (can be updated by config)
 
 // Phase 5: Dispersion explosion
-const BLUE_DISPERSION_TIME = 3.0;     // Initial explosion/dispersion time (seconds) before snake game starts
-const BLUE_DISPERSION_SPEED = 20.0;   // Speed multiplier during dispersion (very fast explosion)
+let BLUE_DISPERSION_TIME = 3.0;     // Initial explosion time (can be updated by config)
+let BLUE_DISPERSION_SPEED = 20.0;   // Speed multiplier during dispersion (can be updated by config)
 
 // Phase 10: Snake game - Grid-based Markov walk with eating/cutting
-const BLUE_GRID_SIZE = 8;             // Grid cell size for discrete movement
-const BLUE_STEP_INTERVAL = 0.15;      // Time between steps (seconds) - how fast snakes move
-const BLUE_DIRECTION_CHANGE = 0.15;   // Probability of changing direction each step
-const BLUE_EATING_DISTANCE = 12;      // Distance within which dots can eat each other
-const BLUE_CUTTING_DISTANCE = 8;      // Distance for snake cutting collision
+let BLUE_GRID_SIZE = 8;             // Grid cell size (can be updated by config)
+let BLUE_STEP_INTERVAL = 0.15;      // Time between steps (can be updated by config)
+let BLUE_DIRECTION_CHANGE = 0.15;   // Probability of changing direction (can be updated by config)
+let BLUE_EATING_DISTANCE = 12;      // Distance for eating (can be updated by config)
+let BLUE_CUTTING_DISTANCE = 8;      // Distance for cutting (can be updated by config)
 
 // Phase 8: Background Data Layer (floating words)
 const WORD_EMERGE_DELAY = 3.0;  // Words emerge after rupture begins
 const WORD_EMERGE_DURATION = 4.0;  // Slow emergence from grey space
 const WORD_DRIFT = 0.8;  // Much faster, more fluid drift
 const WORD_DAMPING = 0.96;  // Less damping for more fluid movement
-const TEXT_SIZE_SCALE = 1.0;  // Scale factor for floating text size
+let TEXT_SIZE_SCALE = 1.0;  // Scale factor for floating text size (can be updated by config)
 
 // Edge detection thresholds
 const EDGE_THRESHOLDS = {
@@ -226,6 +229,158 @@ let allEdges = {
 
 let systemReady = false;
 
+// ===== CONFIGURATION LOOPING SYSTEM =====
+// List of configuration files to cycle through
+// The artist will provide 3-4 JSON files exported from the interactive dashboard
+const CONFIG_FILES = [
+  'configs/poster-settings-1.json',
+  'configs/poster-settings-2.json',
+  'configs/poster-settings-3.json'
+];
+
+let configurations = [];  // Loaded configuration objects
+let currentConfigIndex = 0;  // Which config is currently active
+let animationStartTime = 0;  // When the current animation cycle started
+let animationDuration = 0;  // Total duration of one animation cycle (calculated from TIMELINE)
+
+// Apply a configuration to all global variables
+function applyConfiguration(config) {
+  if (!config) {
+    console.warn('⚠️ No configuration provided, using defaults');
+    return;
+  }
+
+  console.log('🔄 Applying configuration:', config.exportedAt || 'Default');
+
+  // Apply timeline settings
+  if (config.timeline) {
+    TIMELINE.breathInhale = config.timeline.breathInhale ?? TIMELINE.breathInhale;
+    TIMELINE.breathHold = config.timeline.breathHold ?? TIMELINE.breathHold;
+    TIMELINE.breathExhale = config.timeline.breathExhale ?? TIMELINE.breathExhale;
+    TIMELINE.releaseGrow = config.timeline.releaseGrow ?? TIMELINE.releaseGrow;
+    TIMELINE.ghostFade = config.timeline.ghostFade ?? TIMELINE.ghostFade;
+    TIMELINE.tangentAppear = config.timeline.tangentAppear ?? TIMELINE.tangentAppear;
+    TIMELINE.gradualFill = config.timeline.gradualFill ?? TIMELINE.gradualFill;
+    TIMELINE.dotsGrow = config.timeline.dotsGrow ?? TIMELINE.dotsGrow;
+    TIMELINE.blueTransformDuration = config.timeline.blueTransformDuration ?? TIMELINE.blueTransformDuration;
+    TIMELINE.textEmergeDuration = config.timeline.textEmergeDuration ?? TIMELINE.textEmergeDuration;
+    TIMELINE.strokeFadeDuration = config.timeline.strokeFadeDuration ?? TIMELINE.strokeFadeDuration;
+    TIMELINE.largeDotStrokeFadeDuration = config.timeline.largeDotStrokeFadeDuration ?? TIMELINE.largeDotStrokeFadeDuration;
+  }
+
+  // Apply Phase 1 settings
+  if (config.phase1) {
+    RECT_GROW_SCALE = config.phase1.rectGrowScale ?? RECT_GROW_SCALE;
+    TEXT_GROW_SCALE = config.phase1.textGrowScale ?? TEXT_GROW_SCALE;
+  }
+
+  // Apply Phase 2 settings
+  if (config.phase2) {
+    TANGENT_DOT_RADIUS = config.phase2.tangentDotRadius ?? TANGENT_DOT_RADIUS;
+    TANGENT_THRESHOLD = config.phase2.tangentThreshold ?? TANGENT_THRESHOLD;
+    TANGENT_SPACING = config.phase2.tangentSpacing ?? TANGENT_SPACING;
+  }
+
+  // Apply Phase 3 settings
+  if (config.phase3) {
+    FILL_TARGET = config.phase3.fillTarget ?? FILL_TARGET;
+    FILL_TARGET_SMALL = config.phase3.fillTargetSmall ?? FILL_TARGET_SMALL;
+    FILL_DOT_RADIUS = config.phase3.fillDotRadius ?? FILL_DOT_RADIUS;
+    FILL_SPACING_2026 = config.phase3.fillSpacing2026 ?? FILL_SPACING_2026;
+    FILL_SPACING_OTHER = config.phase3.fillSpacingOther ?? FILL_SPACING_OTHER;
+  }
+
+  // Apply Phase 4 settings
+  if (config.phase4) {
+    DOT_GROW_2026 = config.phase4.dotGrow2026 ?? DOT_GROW_2026;
+    DOT_GROW_OTHER = config.phase4.dotGrowOther ?? DOT_GROW_OTHER;
+    STROKE_GROW_MAX = config.phase4.strokeGrowMax ?? STROKE_GROW_MAX;
+  }
+
+  // Apply Phase 5 settings
+  if (config.phase5) {
+    BLUE_DISPERSION_TIME = config.phase5.dispersionDuration ?? BLUE_DISPERSION_TIME;
+    BLUE_DISPERSION_SPEED = config.phase5.dispersionSpeed ?? BLUE_DISPERSION_SPEED;
+  }
+
+  // Apply Phase 6 settings
+  if (config.phase6) {
+    BLUE_DOT_PERCENTAGE = config.phase6.blueDotPercentage ?? BLUE_DOT_PERCENTAGE;
+    BLUE_DOT_SHRINK_OTHER = config.phase6.blueDotShrinkOther ?? BLUE_DOT_SHRINK_OTHER;
+  }
+
+  // Apply Phase 7 settings
+  if (config.phase7) {
+    BASE_SPEED = config.phase7.baseSpeed ?? BASE_SPEED;
+    LARGE_DOT_SPEED = config.phase7.largeDotSpeed ?? LARGE_DOT_SPEED;
+    FLOAT_DAMPING = config.phase7.floatDamping ?? FLOAT_DAMPING;
+    ATTRACTION_STRENGTH = config.phase7.attractionStrength ?? ATTRACTION_STRENGTH;
+    MIN_DISTANCE_FROM_POINT = config.phase7.minDistanceFromPoint ?? MIN_DISTANCE_FROM_POINT;
+    GUST_STRENGTH = config.phase7.gustStrength ?? GUST_STRENGTH;
+    GUST_FREQUENCY = config.phase7.gustFrequency ?? GUST_FREQUENCY;
+    SPEED_VARIATION_MIN = config.phase7.speedVariationMin ?? SPEED_VARIATION_MIN;
+    SPEED_VARIATION_MAX = config.phase7.speedVariationMax ?? SPEED_VARIATION_MAX;
+  }
+
+  // Apply Phase 8 settings
+  if (config.phase8) {
+    TEXT_SIZE_SCALE = config.phase8.textSizeScale ?? TEXT_SIZE_SCALE;
+  }
+
+  // Apply Phase 10 settings
+  if (config.phase10) {
+    BLUE_GRID_SIZE = config.phase10.snakeGridSize ?? BLUE_GRID_SIZE;
+    BLUE_STEP_INTERVAL = config.phase10.snakeStepInterval ?? BLUE_STEP_INTERVAL;
+    BLUE_DIRECTION_CHANGE = config.phase10.snakeDirectionChange ?? BLUE_DIRECTION_CHANGE;
+    BLUE_EATING_DISTANCE = config.phase10.snakeEatingDistance ?? BLUE_EATING_DISTANCE;
+    BLUE_CUTTING_DISTANCE = config.phase10.snakeCuttingDistance ?? BLUE_CUTTING_DISTANCE;
+  }
+
+  // Recalculate animation duration (when does the final phase complete?)
+  animationDuration = TIMELINE.phase11Start + TIMELINE.largeDotStrokeFadeDuration;
+
+  console.log(`📊 Animation duration: ${animationDuration}s`);
+}
+
+// Reset the animation to start from the beginning
+function resetAnimation() {
+  console.log('🔄 Resetting animation...');
+
+  // Reset time
+  animationStartTime = millis();
+
+  // Clear all dots and state
+  tangentDots = [];
+  fillDots = {
+    numbers2026: [],
+    times: [],
+    language: [],
+    address: [],
+    topBlock: [],
+    bottomLeft: []
+  };
+  floatingWords = [];
+
+  // Re-initialize all phases
+  if (systemReady) {
+    initPhase1();
+    initPhase2();
+    initPhase3();
+    initPhases5to11();
+  }
+
+  console.log('✅ Animation reset complete');
+}
+
+// Switch to the next configuration and restart
+function switchToNextConfig() {
+  currentConfigIndex = (currentConfigIndex + 1) % configurations.length;
+  console.log(`🔀 Switching to config ${currentConfigIndex + 1}/${configurations.length}`);
+
+  applyConfiguration(configurations[currentConfigIndex]);
+  resetAnimation();
+}
+
 function preload() {
   numbersImg = loadImage("assets/images/2026.png");
   topSVG     = loadImage("assets/svg/top-block.svg");
@@ -235,6 +390,18 @@ function preload() {
   langImg    = loadImage("assets/images/Language.png");
   rectangleLinesSVG = loadImage("assets/svg/rectangle-lines.svg");
   textData = loadJSON("assets/data/text-data.json");  // Load exact text positions from Figma
+
+  // Load all configuration files
+  console.log(`📂 Loading ${CONFIG_FILES.length} configuration file(s)...`);
+  for (let i = 0; i < CONFIG_FILES.length; i++) {
+    try {
+      configurations[i] = loadJSON(CONFIG_FILES[i]);
+      console.log(`✅ Loaded config ${i + 1}: ${CONFIG_FILES[i]}`);
+    } catch (error) {
+      console.warn(`⚠️ Failed to load ${CONFIG_FILES[i]}, using defaults`);
+      configurations[i] = null;
+    }
+  }
 }
 
 function setup() {
@@ -253,14 +420,27 @@ function setup() {
   posterLayer.pixelDensity(1);
   renderPosterTo(posterLayer);
 
+  // Apply first configuration (if available)
+  if (configurations.length > 0 && configurations[0]) {
+    applyConfiguration(configurations[0]);
+  } else {
+    // Calculate default duration
+    animationDuration = TIMELINE.phase11Start + TIMELINE.largeDotStrokeFadeDuration;
+  }
+
   // Initialize all systems
   initPhase1();
   initPhase2();
   initPhase3();
   initPhases5to11();
 
+  // Set animation start time
+  animationStartTime = millis();
+
   systemReady = true;
   console.log("✅ Animation system ready");
+  console.log(`🎬 Starting with config 1/${configurations.length || 1}`);
+  console.log(`⏱️ Animation will loop every ${animationDuration}s`);
 }
 
 // ===== PHASE 1: RECTANGLE INITIALIZATION =====
@@ -340,8 +520,8 @@ function findTangentPoints(edges, threshold, radius) {
   // Create a spatial map for quick neighbor lookup
   const edgeSet = new Set(edges.map(e => `${e.x},${e.y}`));
 
-  // Sample edges and check local direction
-  const spacing = 15;  // Moderate spacing for tangent dots
+  // Sample edges and check local direction (use configurable spacing)
+  const spacing = TANGENT_SPACING;
   const checked = new Set();
   
   for (const edge of edges) {
@@ -444,23 +624,23 @@ function traceAllEdges() {
   numbersG.pixelDensity(1);
   numbersG.clear();
   numbersG.image(numbersImg, 0, 0, BASE_W, BASE_H);
-  allEdges.numbers2026 = sampleEdges(traceEdgesFromGraphics(numbersG, EDGE_THRESHOLDS.numbers2026), 15);  // Moderate spacing
+  allEdges.numbers2026 = sampleEdges(traceEdgesFromGraphics(numbersG, EDGE_THRESHOLDS.numbers2026), FILL_SPACING_2026);
 
-  // Small text elements - tight spacing for high density
+  // Small text elements - use configurable spacing
   const timesG = renderElementToGraphics(timesImg, items.times);
-  allEdges.times = sampleEdges(traceEdgesFromGraphics(timesG, EDGE_THRESHOLDS.times), 4);
+  allEdges.times = sampleEdges(traceEdgesFromGraphics(timesG, EDGE_THRESHOLDS.times), FILL_SPACING_OTHER);
 
   const langG = renderElementToGraphics(langImg, items.lang);
-  allEdges.language = sampleEdges(traceEdgesFromGraphics(langG, EDGE_THRESHOLDS.language), 4);
+  allEdges.language = sampleEdges(traceEdgesFromGraphics(langG, EDGE_THRESHOLDS.language), FILL_SPACING_OTHER);
 
   const addrG = renderElementToGraphics(addrSVG, items.addr);
-  allEdges.address = sampleEdges(traceEdgesFromGraphics(addrG, EDGE_THRESHOLDS.address), 4);
+  allEdges.address = sampleEdges(traceEdgesFromGraphics(addrG, EDGE_THRESHOLDS.address), FILL_SPACING_OTHER);
 
   const topG = renderElementToGraphics(topSVG, items.top);
-  allEdges.topBlock = sampleEdges(traceEdgesFromGraphics(topG, EDGE_THRESHOLDS.topBlock), 4);
+  allEdges.topBlock = sampleEdges(traceEdgesFromGraphics(topG, EDGE_THRESHOLDS.topBlock), FILL_SPACING_OTHER);
 
   const botG = renderElementToGraphics(botLSVG, items.botL);
-  allEdges.bottomLeft = sampleEdges(traceEdgesFromGraphics(botG, EDGE_THRESHOLDS.bottomLeft), 4);
+  allEdges.bottomLeft = sampleEdges(traceEdgesFromGraphics(botG, EDGE_THRESHOLDS.bottomLeft), FILL_SPACING_OTHER);
 }
 
 function sampleEdges(edges, spacing) {
@@ -611,7 +791,14 @@ function initFloatingWords() {
 function draw() {
   if (!systemReady) return;
 
-  const t = millis() / 1000;
+  // Calculate relative time from start of current animation cycle
+  const t = (millis() - animationStartTime) / 1000;
+
+  // Check if animation cycle is complete and we should loop to next config
+  if (configurations.length > 1 && t >= animationDuration) {
+    switchToNextConfig();
+    return; // Skip this frame, restart next frame
+  }
 
   // Update all phases
   updatePhase1(t);

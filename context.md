@@ -6,11 +6,14 @@ Animated poster for "Times Language 2026" exhibition. Eleven-phase animation sys
 ## Files Structure
 ```
 p5js/
-├── index.html                      # Entry point (standard animation)
+├── index.html                      # Entry point (standard animation with config looping)
 ├── interactive.html                # Interactive version with control panel
 ├── src/
-│   ├── sketch.js                   # Main animation (complete 11-phase system)
+│   ├── sketch.js                   # Main animation (complete 11-phase system + config loader)
 │   └── sketch-interactive.js       # Interactive animation with real-time parameter control
+├── configs/
+│   ├── README.md                   # Configuration system documentation
+│   └── example-config.json         # Example configuration template
 ├── export/
 │   ├── export.html                 # Export utility page
 │   └── export-poster.js            # Utility to export poster as PNG
@@ -362,12 +365,14 @@ Each dot tracks:
 
 ## How to Run
 
-### Standard Animation
+### Standard Animation (with Configuration Looping)
 ```bash
 cd p5js
 npx serve .
 # Open http://localhost:3000 (index.html)
 ```
+
+The standard animation automatically cycles through multiple configuration files placed in the `configs/` folder. See the Configuration Looping System section below for details.
 
 ### Interactive Version with Control Panel
 ```bash
@@ -442,6 +447,61 @@ The interactive version includes:
 **Phase 11: The Ecosystem**
 - Large dot stroke fade duration (5-60 seconds)
 - Regenerate button for all dot properties
+
+## Configuration Looping System
+
+The main animation (index.html) supports automatic cycling through multiple parameter configurations, allowing the artist to create variations that loop continuously.
+
+### Workflow
+
+1. **Export Configurations**: Use the interactive dashboard to adjust parameters and export JSON files
+2. **Organize Files**: Place exported configurations in `p5js/configs/` folder
+3. **Update File List**: Edit the `CONFIG_FILES` array in `src/sketch.js`
+4. **Run Animation**: The poster will automatically cycle through all configurations
+
+### Configuration Export
+
+The interactive dashboard includes an "Export Settings" button that downloads a JSON file containing all current parameter values organized by phase:
+- Timeline settings (durations)
+- Phase 1-11 parameters (growth scales, speeds, densities, etc.)
+
+### Automatic Looping
+
+When multiple configurations are loaded:
+- Animation plays through one complete cycle (~138 seconds with default timeline)
+- Automatically switches to next configuration and restarts
+- Loops back to first configuration after completing all variations
+- Seamless transitions between parameter sets
+
+### Configuration Structure
+
+Each JSON configuration file includes:
+```json
+{
+  "timeline": { /* phase durations */ },
+  "phase1": { /* breathing animation settings */ },
+  "phase2": { /* constellation settings */ },
+  "phase3": { /* infusion density and spacing */ },
+  "phase4": { /* bloom growth scales */ },
+  "phase5": { /* dispersion settings */ },
+  "phase6": { /* transformation percentages */ },
+  "phase7": { /* floating behavior parameters */ },
+  "phase8": { /* text size scaling */ },
+  "phase10": { /* snake game mechanics */ }
+}
+```
+
+See `p5js/configs/README.md` for detailed documentation and examples.
+
+### Example Use Case
+
+Artist creates 4 variations:
+1. **Calm Drift**: Slow speeds, gentle movements, sparse dots
+2. **Energetic Chaos**: Fast speeds, frequent gusts, dense dots
+3. **Minimal**: Low fill targets, large spacing, clean aesthetic
+4. **Maximal**: High fill targets, tight spacing, overwhelming density
+
+The poster continuously cycles through these moods every ~2 minutes.
 
 ## Figma Integration
 

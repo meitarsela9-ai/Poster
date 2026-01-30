@@ -1,0 +1,70 @@
+{
+  "exportedAt": "2026-01-30T09:38:53.022Z",
+  "version": "1.0",
+  "timeline": {
+    "breathInhale": 2,
+    "breathHold": 1,
+    "breathExhale": 2,
+    "releaseGrow": 2.5,
+    "ghostFade": 1.5,
+    "tangentAppear": 12,
+    "gradualFill": 30,
+    "dotsGrow": 18,
+    "blueTransformDuration": 1,
+    "textEmergeDuration": 12,
+    "strokeFadeDuration": 12,
+    "largeDotStrokeFadeDuration": 15
+  },
+  "phase1": {
+    "rectGrowScale": 1.1,
+    "textGrowScale": 1.05
+  },
+  "phase2": {
+    "tangentDotRadius": 3,
+    "tangentThreshold": 0.15,
+    "tangentSpacing": 25
+  },
+  "phase3": {
+    "fillTarget": 0.35,
+    "fillTargetSmall": 0.2,
+    "fillDotRadius": 3,
+    "fillSpacing2026": 25,
+    "fillSpacingOther": 6
+  },
+  "phase4": {
+    "dotGrow2026": 13,
+    "dotGrowOther": 5,
+    "strokeGrowMax": 3
+  },
+  "phase5": {
+    "dispersionDuration": 5,
+    "dispersionSpeed": 20
+  },
+  "phase6": {
+    "blueDotPercentage": 0.7,
+    "blueDotShrinkOther": 0.25
+  },
+  "phase7": {
+    "baseSpeed": 0.12,
+    "largeDotSpeed": 0.2,
+    "floatDamping": 0.97,
+    "attractionStrength": 0.04,
+    "minDistanceFromPoint": 0.4,
+    "gustStrength": 5,
+    "gustFrequency": 0.4,
+    "speedVariationMin": 0.7,
+    "speedVariationMax": 1.3
+  },
+  "phase8": {
+    "textSizeScale": 0.6
+  },
+  "phase9": {},
+  "phase10": {
+    "snakeGridSize": 8,
+    "snakeStepInterval": 0.1,
+    "snakeDirectionChange": 0.15,
+    "snakeEatingDistance": 12,
+    "snakeCuttingDistance": 8
+  },
+  "phase11": {}
+}
