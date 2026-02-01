@@ -242,6 +242,11 @@ let currentConfigIndex = 0;  // Which config is currently active
 let animationStartTime = 0;  // When the current animation cycle started
 let animationDuration = 0;  // Total duration of one animation cycle (calculated from TIMELINE)
 
+// Download button state
+let waitingForDownload = false;  // True when Phase 11 is complete and waiting for user
+let downloadButton = null;  // Reference to the download button element
+let configLabel = null;  // Reference to the config counter display
+
 // Apply a configuration to all global variables
 function applyConfiguration(config) {
   if (!config) {
@@ -400,6 +405,12 @@ function resetAnimation() {
     initPhases5to11();
   }
 
+  // Reset download state
+  waitingForDownload = false;
+  if (downloadButton) {
+    downloadButton.style('display', 'none');
+  }
+
   console.log('✅ Animation reset complete');
 }
 
@@ -410,6 +421,59 @@ function switchToNextConfig() {
 
   applyConfiguration(configurations[currentConfigIndex]);
   resetAnimation();
+
+  // Update config label
+  if (configLabel) {
+    configLabel.html(`Config ${currentConfigIndex + 1} / ${configurations.length}`);
+  }
+
+  // Hide download button and reset waiting state
+  waitingForDownload = false;
+  if (downloadButton) {
+    downloadButton.style('display', 'none');
+  }
+}
+
+// Download the current frame as PNG and advance to next config
+function downloadAndAdvance() {
+  // Generate filename with config number and timestamp
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+  const filename = `poster-config-${currentConfigIndex + 1}-${timestamp}`;
+
+  // Save the canvas as PNG
+  saveCanvas(cnv, filename, 'png');
+  console.log(`📸 Downloaded: ${filename}.png`);
+
+  // Advance to next config (or loop back to first)
+  if (configurations.length > 1) {
+    switchToNextConfig();
+  } else {
+    // Single config mode - just reset
+    resetAnimation();
+    waitingForDownload = false;
+    if (downloadButton) {
+      downloadButton.style('display', 'none');
+    }
+  }
+}
+
+// Show the download button
+function showDownloadButton() {
+  if (downloadButton) {
+    // Update button text based on remaining configs
+    const isLastConfig = currentConfigIndex === configurations.length - 1;
+    const nextConfigNum = (currentConfigIndex + 1) % configurations.length + 1;
+
+    if (configurations.length <= 1) {
+      downloadButton.html('Download PNG & Restart');
+    } else if (isLastConfig) {
+      downloadButton.html('Download PNG & Loop to Config 1');
+    } else {
+      downloadButton.html(`Download PNG & Next (Config ${nextConfigNum})`);
+    }
+
+    downloadButton.style('display', 'block');
+  }
 }
 
 function preload() {
@@ -478,6 +542,33 @@ function setup() {
 
   // Set animation start time
   animationStartTime = millis();
+
+  // Create config counter label (always visible)
+  configLabel = createDiv(`Config ${currentConfigIndex + 1} / ${configurations.length || 1}`);
+  configLabel.position(20, 20);
+  configLabel.style('padding', '10px 20px');
+  configLabel.style('font-size', '14px');
+  configLabel.style('font-family', 'IBM Plex Mono, monospace');
+  configLabel.style('background', 'rgba(0, 0, 0, 0.7)');
+  configLabel.style('color', 'white');
+  configLabel.style('border-radius', '6px');
+  configLabel.style('z-index', '999');
+
+  // Create download button (hidden initially)
+  downloadButton = createButton('Download PNG & Next Config');
+  downloadButton.position(20, 60);
+  downloadButton.style('padding', '15px 30px');
+  downloadButton.style('font-size', '16px');
+  downloadButton.style('font-family', 'IBM Plex Mono, monospace');
+  downloadButton.style('background', '#0095ff');
+  downloadButton.style('color', 'white');
+  downloadButton.style('border', 'none');
+  downloadButton.style('border-radius', '8px');
+  downloadButton.style('cursor', 'pointer');
+  downloadButton.style('box-shadow', '0 4px 15px rgba(0, 149, 255, 0.4)');
+  downloadButton.style('z-index', '1000');
+  downloadButton.style('display', 'none');  // Hidden initially
+  downloadButton.mousePressed(downloadAndAdvance);
 
   systemReady = true;
   console.log("✅ Animation system ready");
@@ -834,25 +925,31 @@ function draw() {
   if (!systemReady) return;
 
   // Calculate relative time from start of current animation cycle
-  const t = (millis() - animationStartTime) / 1000;
+  let t = (millis() - animationStartTime) / 1000;
 
-  // Check if animation cycle is complete and we should loop to next config
-  if (configurations.length > 1 && t >= animationDuration) {
-    switchToNextConfig();
-    return; // Skip this frame, restart next frame
+  // Check if animation cycle is complete
+  if (t >= animationDuration) {
+    // Show download button and wait for user
+    if (!waitingForDownload) {
+      waitingForDownload = true;
+      showDownloadButton();
+      console.log('⏸️ Phase 11 complete. Waiting for download...');
+    }
+    // Clamp time to end of animation so ecosystem keeps running smoothly
+    t = animationDuration;
   }
 
-  // Update all phases
+  // Update all phases (ecosystem keeps running while waiting)
   updatePhase1(t);
   updatePhase2(t);
   updatePhase3(t);
   updatePhase4(t);
   updatePhase5(t);  // Dispersion
   updatePhase6(t);  // Transformation
-  updatePhase7(t);  // Float
+  updatePhase7(t);  // Float - large dots keep floating
   updatePhase8(t);  // Resurfacing
   updatePhase9(t);  // Fade
-  updatePhase10(t); // Snake
+  updatePhase10(t); // Snake - small dots keep moving
   updatePhase11(t); // Ecosystem
 
   // Render
